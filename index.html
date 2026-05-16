@@ -483,42 +483,44 @@
     var goCyan       = '#00ADD8';
 
     // Positions are in an abstract coordinate space; Cytoscape fits them
-    // to the container with `fit: true`.
+    // to the container with `fit: true`. Compound parents (kind=group, cat)
+    // have no position — they auto-size around their children.
     var elements = [
-      { data: { id: 'app',   label: 'Your code',  kind: 'app'  }, position: { x:   0, y: 252 } },
-      { data: { id: 'dalgo', label: 'DALgo',      kind: 'core' }, position: { x: 180, y: 252 } },
+      // app + core
+      { data: { id: 'app',   label: 'Your code',     kind: 'app'  }, position: { x:   0, y: 250 } },
+      { data: { id: 'dalgo', label: 'DALgo\ndal.DB', kind: 'core' }, position: { x: 200, y: 250 } },
 
-      { data: { id: 'sql',   label: 'SQL',                  kind: 'cat'      }, position: { x: 360, y:  72 } },
-      { data: { id: 'fs',    label: 'File System',          kind: 'cat-leaf' }, position: { x: 360, y: 220 } },
-      { data: { id: 'kv',    label: 'Key Value Storages',   kind: 'cat'      }, position: { x: 360, y: 324 } },
-      { data: { id: 'cloud', label: 'Cloud',                kind: 'cat'      }, position: { x: 360, y: 476 } },
+      // outer compound: groups all adapter categories
+      { data: { id: 'adapters', label: 'Adapters', kind: 'group' } },
 
-      { data: { id: 'sqlite',  label: 'SQLite',         kind: 'leaf', parent: 'sql'   }, position: { x: 580, y:   0 } },
-      { data: { id: 'pg',      label: 'PostgreSQL',     kind: 'leaf', parent: 'sql'   }, position: { x: 580, y:  48 } },
-      { data: { id: 'oracle',  label: 'Oracle',         kind: 'leaf', parent: 'sql'   }, position: { x: 580, y:  96 } },
-      { data: { id: 'mssql',   label: 'MS SQL Server',  kind: 'leaf', parent: 'sql'   }, position: { x: 580, y: 144 } },
+      // SQL compound + child leaves
+      { data: { id: 'sql', label: 'SQL', kind: 'cat', parent: 'adapters' } },
+      { data: { id: 'sqlite', label: 'SQLite',        kind: 'leaf', parent: 'sql' }, position: { x: 580, y:  20 } },
+      { data: { id: 'pg',     label: 'PostgreSQL',    kind: 'leaf', parent: 'sql' }, position: { x: 580, y:  56 } },
+      { data: { id: 'oracle', label: 'Oracle',        kind: 'leaf', parent: 'sql' }, position: { x: 580, y:  92 } },
+      { data: { id: 'mssql',  label: 'MS SQL Server', kind: 'leaf', parent: 'sql' }, position: { x: 580, y: 128 } },
 
-      { data: { id: 'redis',    label: 'Redis',    kind: 'leaf', parent: 'kv' }, position: { x: 580, y: 300 } },
-      { data: { id: 'memcache', label: 'Memcache', kind: 'leaf', parent: 'kv' }, position: { x: 580, y: 348 } },
+      // File System: single-row leaf inside the outer compound
+      { data: { id: 'fs', label: 'File System', kind: 'cat-leaf', parent: 'adapters' }, position: { x: 580, y: 210 } },
 
-      { data: { id: 'firestore', label: 'Firebase Firestore',   kind: 'leaf', parent: 'cloud' }, position: { x: 580, y: 428 } },
-      { data: { id: 'bigquery',  label: 'Google BigQuery',      kind: 'leaf', parent: 'cloud' }, position: { x: 580, y: 476 } },
-      { data: { id: 'spanner',   label: 'Google Cloud Spanner', kind: 'leaf', parent: 'cloud' }, position: { x: 580, y: 524 } },
+      // Key Value Storages compound + children
+      { data: { id: 'kv', label: 'Key Value\nStorages', kind: 'cat', parent: 'adapters' } },
+      { data: { id: 'redis',    label: 'Redis',    kind: 'leaf', parent: 'kv' }, position: { x: 580, y: 290 } },
+      { data: { id: 'memcache', label: 'Memcache', kind: 'leaf', parent: 'kv' }, position: { x: 580, y: 326 } },
 
+      // Cloud compound + children
+      { data: { id: 'cloud', label: 'Cloud', kind: 'cat', parent: 'adapters' } },
+      { data: { id: 'firestore', label: 'Firebase Firestore',   kind: 'leaf', parent: 'cloud' }, position: { x: 580, y: 410 } },
+      { data: { id: 'bigquery',  label: 'Google BigQuery',      kind: 'leaf', parent: 'cloud' }, position: { x: 580, y: 446 } },
+      { data: { id: 'spanner',   label: 'Google Cloud Spanner', kind: 'leaf', parent: 'cloud' }, position: { x: 580, y: 482 } },
+
+      // Edges (dalgo -> each category; no edges from category -> children since
+      // the compound containment already shows the grouping).
       { data: { source: 'app',   target: 'dalgo' } },
       { data: { source: 'dalgo', target: 'sql'   } },
       { data: { source: 'dalgo', target: 'fs'    } },
       { data: { source: 'dalgo', target: 'kv'    } },
-      { data: { source: 'dalgo', target: 'cloud' } },
-      { data: { source: 'sql',   target: 'sqlite' } },
-      { data: { source: 'sql',   target: 'pg'     } },
-      { data: { source: 'sql',   target: 'oracle' } },
-      { data: { source: 'sql',   target: 'mssql'  } },
-      { data: { source: 'kv',    target: 'redis'    } },
-      { data: { source: 'kv',    target: 'memcache' } },
-      { data: { source: 'cloud', target: 'firestore' } },
-      { data: { source: 'cloud', target: 'bigquery'  } },
-      { data: { source: 'cloud', target: 'spanner'   } }
+      { data: { source: 'dalgo', target: 'cloud' } }
     ];
 
     var monoFont = 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace';
@@ -535,6 +537,7 @@
       minZoom: 0.4,
       maxZoom: 1.2,
       style: [
+        // Base node style (overridden per kind below)
         {
           selector: 'node',
           style: {
@@ -557,6 +560,8 @@
             'transition-duration': '120ms'
           }
         },
+
+        // "Your code" node
         {
           selector: 'node[kind="app"]',
           style: {
@@ -566,6 +571,8 @@
             'font-style': 'italic'
           }
         },
+
+        // DALgo core — round, two-line label "DALgo / dal.DB"
         {
           selector: 'node[kind="core"]',
           style: {
@@ -573,22 +580,79 @@
             'background-color': canvas,
             'border-color': accent,
             'border-width': 2,
-            'width': 84,
-            'height': 84,
-            'font-size': 14,
+            'width': 100,
+            'height': 100,
+            'font-size': 13,
             'font-weight': 700,
-            'color': accent
+            'color': accent,
+            'text-wrap': 'wrap',
+            'text-justification': 'center',
+            'line-height': 1.4
           }
         },
+
+        // Outer compound that groups all adapters
         {
-          selector: 'node[kind="cat"], node[kind="cat-leaf"]',
+          selector: 'node[kind="group"]',
+          style: {
+            'shape': 'round-rectangle',
+            'background-color': subtle,
+            'background-opacity': 0.6,
+            'border-color': border,
+            'border-width': 1,
+            'border-style': 'dashed',
+            'color': muted,
+            'font-family': monoFont,
+            'font-size': 10,
+            'font-weight': 700,
+            'text-transform': 'uppercase',
+            'text-halign': 'center',
+            'text-valign': 'top',
+            'text-margin-y': -10,
+            'padding-top': 14,
+            'padding-bottom': 14,
+            'padding-left': 110,
+            'padding-right': 14
+          }
+        },
+
+        // Category compound (SQL / KV / Cloud) — label OUTSIDE-LEFT of the box
+        {
+          selector: 'node[kind="cat"]',
+          style: {
+            'shape': 'round-rectangle',
+            'background-color': accentSubtle,
+            'background-opacity': 1,
+            'border-color': accent,
+            'border-width': 1,
+            'color': accent,
+            'font-family': monoFont,
+            'font-size': 11,
+            'font-weight': 700,
+            'text-halign': 'left',
+            'text-valign': 'center',
+            'text-margin-x': -10,
+            'text-wrap': 'wrap',
+            'text-max-width': 90,
+            'text-justification': 'right',
+            'line-height': 1.25,
+            'padding': 10
+          }
+        },
+
+        // File System: styled as a category but is a leaf (no children)
+        {
+          selector: 'node[kind="cat-leaf"]',
           style: {
             'background-color': accentSubtle,
             'border-color': accent,
             'color': accent,
-            'font-weight': 700
+            'font-weight': 700,
+            'padding': '8px'
           }
         },
+
+        // Leaf adapter nodes inside category compounds
         {
           selector: 'node[kind="leaf"]',
           style: {
@@ -598,40 +662,41 @@
             'color': fg
           }
         },
+
+        // Edges
         {
           selector: 'edge',
           style: {
             'curve-style': 'bezier',
             'line-color': accent,
-            'opacity': 0.45,
+            'opacity': 0.5,
             'width': 1.2,
             'target-arrow-shape': 'none',
             'transition-property': 'opacity, line-color, width',
             'transition-duration': '150ms'
           }
         },
-        {
-          selector: 'node.dim',  style: { 'opacity': 0.25 }
-        },
-        {
-          selector: 'edge.dim',  style: { 'opacity': 0.08 }
-        },
-        {
-          selector: 'edge.hi',
-          style: { 'opacity': 1, 'width': 2, 'line-color': goCyan }
-        },
-        {
-          selector: 'node.hi',
-          style: { 'border-color': goCyan, 'border-width': 2 }
-        }
+
+        // Hover-highlight classes (applied/removed in JS)
+        { selector: 'node.dim',  style: { 'opacity': 0.25 } },
+        { selector: 'edge.dim',  style: { 'opacity': 0.08 } },
+        { selector: 'edge.hi',   style: { 'opacity': 1, 'width': 2, 'line-color': goCyan } },
+        { selector: 'node.hi',   style: { 'border-color': goCyan, 'border-width': 2 } }
       ],
       layout: { name: 'preset', fit: true, padding: 18 }
     });
 
-    // Hover highlight: focus a node + its closed neighborhood.
+    // Hover highlight: focus a node + its closed neighborhood + parent
+    // chain (compounds) + descendants. We include ancestors/descendants
+    // because compound nodes connect to their children by containment,
+    // not by edges.
     cy.on('mouseover', 'node', function (e) {
       var n = e.target;
-      var nbh = n.closedNeighborhood();
+      var nbh = n.closedNeighborhood()
+                 .union(n.ancestors())
+                 .union(n.descendants())
+                 .union(n.descendants().connectedEdges())
+                 .union(n.ancestors().connectedEdges());
       cy.elements().difference(nbh).addClass('dim');
       nbh.removeClass('dim').addClass('hi');
     });
