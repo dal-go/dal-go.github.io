@@ -490,7 +490,7 @@
     var REPO  = 'https://github.com/dal-go/';
     var elements = [
       // app + core
-      { data: { id: 'app',   label: 'Your code',     kind: 'app'  }, position: { x:   0, y: 290 } },
+      { data: { id: 'app',   label: 'Your Go code',  kind: 'app'  }, position: { x:   0, y: 290 } },
       { data: { id: 'dalgo', label: 'DALgo\ndal.DB', kind: 'core',
                 url: REPO + 'dalgo' },                                position: { x: 200, y: 290 } },
 
@@ -591,14 +591,22 @@
           }
         },
 
-        // "Your code" node
+        // "Your Go code" node — visually prominent (the user's starting point)
         {
           selector: 'node[kind="app"]',
           style: {
-            'background-color': subtle,
-            'border-color': border,
-            'color': muted,
-            'font-style': 'italic'
+            'background-color': canvas,
+            'border-color': goCyan,
+            'border-width': 2,
+            'color': fg,
+            'font-weight': 700,
+            'font-size': 13,
+            'padding': '12px',
+            'shadow-blur': 14,
+            'shadow-color': goCyan,
+            'shadow-opacity': 0.35,
+            'shadow-offset-x': 0,
+            'shadow-offset-y': 0
           }
         },
 
@@ -714,13 +722,17 @@
       layout: { name: 'preset', fit: true, padding: 18 }
     });
 
-    // Hover highlight: light the full upstream path from the hovered node
-    // back through DALgo to "Your code". predecessors() walks incoming
-    // directed edges and returns every node/edge that can reach `n`,
-    // which is exactly the path-to-root for this DAG.
+    // Hover highlight: light the upstream path back to "Your Go code"
+    // (via DALgo) AND the downstream successors of the hovered node, so
+    // hovering an intermediate like SQL keeps its children (SQLite,
+    // PostgreSQL, ...) active too. For the DAG: predecessors() walks
+    // incoming edges; successors() walks outgoing edges.
     cy.on('mouseover', 'node', function (e) {
       var n = e.target;
-      var path = n.predecessors().union(n).union(n.ancestors());
+      var path = n.predecessors()
+                  .union(n)
+                  .union(n.successors())
+                  .union(n.ancestors());
       // If user hovers the outer Adapters compound directly, light its
       // descendants too — otherwise the whole graph would dim.
       if (n.isParent()) {
