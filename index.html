@@ -91,60 +91,15 @@
     <!-- Bridge diagram -->
     <figure class="diagram" aria-label="DALgo bridges your Go code to many databases">
       <div class="diagram-frame">
-        <div class="diag-col diag-left">
-          <span class="diag-tag">Your code</span>
-          <div class="diag-node node-app">
-            <span class="node-row">
-              <svg class="octicon" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M0 1.75A.75.75 0 0 1 .75 1h4.253c1.227 0 2.317.59 3 1.501A3.743 3.743 0 0 1 11.006 1h4.245a.75.75 0 0 1 .75.75v10.5a.75.75 0 0 1-.75.75h-4.507a2.25 2.25 0 0 0-1.591.659l-.622.621a.75.75 0 0 1-1.06 0l-.622-.621A2.25 2.25 0 0 0 5.258 13H.75a.75.75 0 0 1-.75-.75V1.75Z"/></svg>
-              <code>main.go</code>
-            </span>
-            <code class="muted">// uses dal.Database</code>
-          </div>
-        </div>
-
-        <div class="diag-col diag-center">
-          <div class="diag-wires" aria-hidden="true">
-            <svg viewBox="0 0 220 320" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="wire" x1="0" x2="1">
-                  <stop class="wire-stop" offset="0"  stop-opacity="0"/>
-                  <stop class="wire-stop" offset=".5" stop-opacity=".95"/>
-                  <stop class="wire-stop" offset="1"  stop-opacity="0"/>
-                </linearGradient>
-              </defs>
-              <g fill="none" stroke="url(#wire)" stroke-width="1.2">
-                <path d="M0 160 L110 160"/>
-                <path d="M110 160 L220 20"/>
-                <path d="M110 160 L220 60"/>
-                <path d="M110 160 L220 100"/>
-                <path d="M110 160 L220 140"/>
-                <path d="M110 160 L220 180"/>
-                <path d="M110 160 L220 220"/>
-                <path d="M110 160 L220 260"/>
-                <path d="M110 160 L220 300"/>
-              </g>
-              <circle class="wire-hub" cx="110" cy="160" r="5"/>
-            </svg>
-          </div>
-          <div class="diag-node node-core">
-            <span class="core-mark">d/</span>
-            <span class="core-name">dalgo</span>
-            <span class="core-sub">dal.Database</span>
-          </div>
-        </div>
-
-        <div class="diag-col diag-right" role="list">
-          <span class="diag-tag">Adapters</span>
-          <span class="diag-leaf" role="listitem">SQL</span>
-          <span class="diag-leaf" role="listitem">SQLite</span>
-          <span class="diag-leaf" role="listitem">Firestore</span>
-          <span class="diag-leaf" role="listitem">Datastore</span>
-          <span class="diag-leaf" role="listitem">BuntDB</span>
-          <span class="diag-leaf" role="listitem">Badger</span>
-          <span class="diag-leaf" role="listitem">Files</span>
-          <span class="diag-leaf" role="listitem">Git</span>
-          <span class="diag-leaf" role="listitem">inGitDB</span>
-        </div>
+        <div class="diagram-canvas" id="cy" role="img"
+             aria-label="Graph: your Go code talks to DALgo, which adapts to SQL (SQLite, PostgreSQL, Oracle, MS SQL Server), File System, Key Value Storages (Redis, Memcache), and Cloud (Firebase Firestore, Google BigQuery, Google Cloud Spanner)."></div>
+        <noscript>
+          <p class="diagram-fallback">
+            Your code → <strong>DALgo</strong> → SQL (SQLite, PostgreSQL, Oracle, MS SQL Server) ·
+            File System · Key Value Storages (Redis, Memcache) ·
+            Cloud (Firebase Firestore, Google BigQuery, Google Cloud Spanner).
+          </p>
+        </noscript>
       </div>
     </figure>
 
@@ -503,6 +458,194 @@
 
 <script>
   document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+
+<script src="https://unpkg.com/cytoscape@3.30.2/dist/cytoscape.min.js" defer></script>
+<script defer>
+  window.addEventListener('load', function () {
+    if (!window.cytoscape) return;
+    var container = document.getElementById('cy');
+    if (!container) return;
+
+    var css = getComputedStyle(document.documentElement);
+    var v = function (n, fallback) {
+      var x = css.getPropertyValue(n).trim();
+      return x || fallback;
+    };
+    var accent       = v('--accent-fg', '#0969da');
+    var accentSubtle = v('--accent-subtle', '#ddf4ff');
+    var canvas       = v('--canvas-default', '#ffffff');
+    var subtle       = v('--canvas-subtle', '#f6f8fa');
+    var border       = v('--border-default', '#d1d9e0');
+    var fg           = v('--fg-default', '#1f2328');
+    var muted        = v('--fg-muted', '#59636e');
+    var done         = v('--done-fg', '#8250df');
+    var goCyan       = '#00ADD8';
+
+    // Positions are in an abstract coordinate space; Cytoscape fits them
+    // to the container with `fit: true`.
+    var elements = [
+      { data: { id: 'app',   label: 'Your code',  kind: 'app'  }, position: { x:   0, y: 252 } },
+      { data: { id: 'dalgo', label: 'DALgo',      kind: 'core' }, position: { x: 180, y: 252 } },
+
+      { data: { id: 'sql',   label: 'SQL',                  kind: 'cat'      }, position: { x: 360, y:  72 } },
+      { data: { id: 'fs',    label: 'File System',          kind: 'cat-leaf' }, position: { x: 360, y: 220 } },
+      { data: { id: 'kv',    label: 'Key Value Storages',   kind: 'cat'      }, position: { x: 360, y: 324 } },
+      { data: { id: 'cloud', label: 'Cloud',                kind: 'cat'      }, position: { x: 360, y: 476 } },
+
+      { data: { id: 'sqlite',  label: 'SQLite',         kind: 'leaf', parent: 'sql'   }, position: { x: 580, y:   0 } },
+      { data: { id: 'pg',      label: 'PostgreSQL',     kind: 'leaf', parent: 'sql'   }, position: { x: 580, y:  48 } },
+      { data: { id: 'oracle',  label: 'Oracle',         kind: 'leaf', parent: 'sql'   }, position: { x: 580, y:  96 } },
+      { data: { id: 'mssql',   label: 'MS SQL Server',  kind: 'leaf', parent: 'sql'   }, position: { x: 580, y: 144 } },
+
+      { data: { id: 'redis',    label: 'Redis',    kind: 'leaf', parent: 'kv' }, position: { x: 580, y: 300 } },
+      { data: { id: 'memcache', label: 'Memcache', kind: 'leaf', parent: 'kv' }, position: { x: 580, y: 348 } },
+
+      { data: { id: 'firestore', label: 'Firebase Firestore',   kind: 'leaf', parent: 'cloud' }, position: { x: 580, y: 428 } },
+      { data: { id: 'bigquery',  label: 'Google BigQuery',      kind: 'leaf', parent: 'cloud' }, position: { x: 580, y: 476 } },
+      { data: { id: 'spanner',   label: 'Google Cloud Spanner', kind: 'leaf', parent: 'cloud' }, position: { x: 580, y: 524 } },
+
+      { data: { source: 'app',   target: 'dalgo' } },
+      { data: { source: 'dalgo', target: 'sql'   } },
+      { data: { source: 'dalgo', target: 'fs'    } },
+      { data: { source: 'dalgo', target: 'kv'    } },
+      { data: { source: 'dalgo', target: 'cloud' } },
+      { data: { source: 'sql',   target: 'sqlite' } },
+      { data: { source: 'sql',   target: 'pg'     } },
+      { data: { source: 'sql',   target: 'oracle' } },
+      { data: { source: 'sql',   target: 'mssql'  } },
+      { data: { source: 'kv',    target: 'redis'    } },
+      { data: { source: 'kv',    target: 'memcache' } },
+      { data: { source: 'cloud', target: 'firestore' } },
+      { data: { source: 'cloud', target: 'bigquery'  } },
+      { data: { source: 'cloud', target: 'spanner'   } }
+    ];
+
+    var monoFont = 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace';
+
+    var cy = cytoscape({
+      container: container,
+      elements: elements,
+      wheelSensitivity: 0.2,
+      userZoomingEnabled: false,
+      userPanningEnabled: false,
+      boxSelectionEnabled: false,
+      autoungrabify: true,
+      autounselectify: true,
+      minZoom: 0.4,
+      maxZoom: 1.2,
+      style: [
+        {
+          selector: 'node',
+          style: {
+            'label': 'data(label)',
+            'text-valign': 'center',
+            'text-halign': 'center',
+            'font-family': monoFont,
+            'font-size': 11,
+            'font-weight': 500,
+            'color': fg,
+            'background-color': canvas,
+            'border-color': border,
+            'border-width': 1,
+            'shape': 'round-rectangle',
+            'width': 'label',
+            'height': 26,
+            'padding': '10px',
+            'text-margin-y': 0,
+            'transition-property': 'border-color, background-color, border-width',
+            'transition-duration': '120ms'
+          }
+        },
+        {
+          selector: 'node[kind="app"]',
+          style: {
+            'background-color': subtle,
+            'border-color': border,
+            'color': muted,
+            'font-style': 'italic'
+          }
+        },
+        {
+          selector: 'node[kind="core"]',
+          style: {
+            'shape': 'ellipse',
+            'background-color': canvas,
+            'border-color': accent,
+            'border-width': 2,
+            'width': 84,
+            'height': 84,
+            'font-size': 14,
+            'font-weight': 700,
+            'color': accent
+          }
+        },
+        {
+          selector: 'node[kind="cat"], node[kind="cat-leaf"]',
+          style: {
+            'background-color': accentSubtle,
+            'border-color': accent,
+            'color': accent,
+            'font-weight': 700
+          }
+        },
+        {
+          selector: 'node[kind="leaf"]',
+          style: {
+            'shape': 'round-rectangle',
+            'background-color': canvas,
+            'border-color': border,
+            'color': fg
+          }
+        },
+        {
+          selector: 'edge',
+          style: {
+            'curve-style': 'bezier',
+            'line-color': accent,
+            'opacity': 0.45,
+            'width': 1.2,
+            'target-arrow-shape': 'none',
+            'transition-property': 'opacity, line-color, width',
+            'transition-duration': '150ms'
+          }
+        },
+        {
+          selector: 'node.dim',  style: { 'opacity': 0.25 }
+        },
+        {
+          selector: 'edge.dim',  style: { 'opacity': 0.08 }
+        },
+        {
+          selector: 'edge.hi',
+          style: { 'opacity': 1, 'width': 2, 'line-color': goCyan }
+        },
+        {
+          selector: 'node.hi',
+          style: { 'border-color': goCyan, 'border-width': 2 }
+        }
+      ],
+      layout: { name: 'preset', fit: true, padding: 18 }
+    });
+
+    // Hover highlight: focus a node + its closed neighborhood.
+    cy.on('mouseover', 'node', function (e) {
+      var n = e.target;
+      var nbh = n.closedNeighborhood();
+      cy.elements().difference(nbh).addClass('dim');
+      nbh.removeClass('dim').addClass('hi');
+    });
+    cy.on('mouseout', 'node', function () {
+      cy.elements().removeClass('dim hi');
+    });
+
+    // Keep the graph fitted on resize.
+    var refit;
+    window.addEventListener('resize', function () {
+      clearTimeout(refit);
+      refit = setTimeout(function () { cy.fit(undefined, 18); }, 80);
+    });
+  });
 </script>
 
 </body>
