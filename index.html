@@ -97,7 +97,8 @@
           <p class="diagram-fallback">
             Your code → <strong>DALgo</strong> → SQL (SQLite, PostgreSQL, Oracle, MS SQL Server) ·
             File System · Key Value Storages (Redis, Memcache) ·
-            Cloud (Firebase Firestore, Google BigQuery, Google Cloud Spanner).
+            Cloud (Firebase Firestore, Google BigQuery, Google Cloud Spanner) ·
+            or your own custom adapter.
           </p>
         </noscript>
       </div>
@@ -486,41 +487,61 @@
     // to the container with `fit: true`. The only compound is `adapters`,
     // which auto-sizes around its children. All other nodes are simple
     // nodes connected by edges.
+    var REPO  = 'https://github.com/dal-go/';
     var elements = [
       // app + core
-      { data: { id: 'app',   label: 'Your code',     kind: 'app'  }, position: { x:   0, y: 250 } },
-      { data: { id: 'dalgo', label: 'DALgo\ndal.DB', kind: 'core' }, position: { x: 200, y: 250 } },
+      { data: { id: 'app',   label: 'Your code',     kind: 'app'  }, position: { x:   0, y: 290 } },
+      { data: { id: 'dalgo', label: 'DALgo\ndal.DB', kind: 'core',
+                url: REPO + 'dalgo' },                                position: { x: 200, y: 290 } },
 
       // outer compound: groups all adapter nodes (categories + leaves)
       { data: { id: 'adapters', label: 'Adapters', kind: 'group' } },
 
       // Category parent nodes (left column inside the compound)
-      { data: { id: 'sql',   label: 'SQL',                kind: 'cat', parent: 'adapters' }, position: { x: 420, y:  74 } },
-      { data: { id: 'fs',    label: 'File System',        kind: 'cat', parent: 'adapters' }, position: { x: 420, y: 210 } },
-      { data: { id: 'kv',    label: 'Key Value Storages', kind: 'cat', parent: 'adapters' }, position: { x: 420, y: 308 } },
-      { data: { id: 'cloud', label: 'Cloud',              kind: 'cat', parent: 'adapters' }, position: { x: 420, y: 446 } },
+      { data: { id: 'sql',   label: 'SQL',                kind: 'cat', parent: 'adapters',
+                url: REPO + 'dalgo2sql' },                                position: { x: 420, y:  74 } },
+      { data: { id: 'fs',    label: 'File System',        kind: 'cat', parent: 'adapters',
+                url: REPO + 'dalgo2files' },                              position: { x: 420, y: 210 } },
+      { data: { id: 'kv',    label: 'Key Value Storages', kind: 'cat', parent: 'adapters' },
+                                                                          position: { x: 420, y: 308 } },
+      { data: { id: 'cloud', label: 'Cloud',              kind: 'cat', parent: 'adapters' },
+                                                                          position: { x: 420, y: 446 } },
 
-      // SQL children (right of SQL)
-      { data: { id: 'sqlite', label: 'SQLite',        kind: 'leaf', parent: 'adapters' }, position: { x: 620, y:  20 } },
-      { data: { id: 'pg',     label: 'PostgreSQL',    kind: 'leaf', parent: 'adapters' }, position: { x: 620, y:  56 } },
-      { data: { id: 'oracle', label: 'Oracle',        kind: 'leaf', parent: 'adapters' }, position: { x: 620, y:  92 } },
-      { data: { id: 'mssql',  label: 'MS SQL Server', kind: 'leaf', parent: 'adapters' }, position: { x: 620, y: 128 } },
+      // SQL children (right of SQL). Driver-specific adapters all live in dalgo2sql.
+      { data: { id: 'sqlite', label: 'SQLite',        kind: 'leaf', parent: 'adapters',
+                url: REPO + 'dalgo2sqlite' },                            position: { x: 620, y:  20 } },
+      { data: { id: 'pg',     label: 'PostgreSQL',    kind: 'leaf', parent: 'adapters',
+                url: REPO + 'dalgo2sql' },                               position: { x: 620, y:  56 } },
+      { data: { id: 'oracle', label: 'Oracle',        kind: 'leaf', parent: 'adapters',
+                url: REPO + 'dalgo2sql' },                               position: { x: 620, y:  92 } },
+      { data: { id: 'mssql',  label: 'MS SQL Server', kind: 'leaf', parent: 'adapters',
+                url: REPO + 'dalgo2sql' },                               position: { x: 620, y: 128 } },
 
       // Key Value Storages children
-      { data: { id: 'redis',    label: 'Redis',    kind: 'leaf', parent: 'adapters' }, position: { x: 620, y: 290 } },
-      { data: { id: 'memcache', label: 'Memcache', kind: 'leaf', parent: 'adapters' }, position: { x: 620, y: 326 } },
+      { data: { id: 'redis',    label: 'Redis',    kind: 'leaf', parent: 'adapters' },
+                                                                          position: { x: 620, y: 290 } },
+      { data: { id: 'memcache', label: 'Memcache', kind: 'leaf', parent: 'adapters',
+                url: REPO + 'dalgo-memcache-appengine' },                position: { x: 620, y: 326 } },
 
       // Cloud children
-      { data: { id: 'firestore', label: 'Firebase Firestore',   kind: 'leaf', parent: 'adapters' }, position: { x: 620, y: 410 } },
-      { data: { id: 'bigquery',  label: 'Google BigQuery',      kind: 'leaf', parent: 'adapters' }, position: { x: 620, y: 446 } },
-      { data: { id: 'spanner',   label: 'Google Cloud Spanner', kind: 'leaf', parent: 'adapters' }, position: { x: 620, y: 482 } },
+      { data: { id: 'firestore', label: 'Firebase Firestore',   kind: 'leaf', parent: 'adapters',
+                url: REPO + 'dalgo2firestore' },                         position: { x: 620, y: 410 } },
+      { data: { id: 'bigquery',  label: 'Google BigQuery',      kind: 'leaf', parent: 'adapters' },
+                                                                          position: { x: 620, y: 446 } },
+      { data: { id: 'spanner',   label: 'Google Cloud Spanner', kind: 'leaf', parent: 'adapters' },
+                                                                          position: { x: 620, y: 482 } },
+
+      // Extensibility: roll your own adapter
+      { data: { id: 'custom', label: 'Your own custom adapter', kind: 'custom', parent: 'adapters',
+                url: REPO + 'dalgo/blob/main/CONTRIBUTING.md' },         position: { x: 420, y: 560 } },
 
       // Edges
-      { data: { source: 'app',   target: 'dalgo' } },
-      { data: { source: 'dalgo', target: 'sql'   } },
-      { data: { source: 'dalgo', target: 'fs'    } },
-      { data: { source: 'dalgo', target: 'kv'    } },
-      { data: { source: 'dalgo', target: 'cloud' } },
+      { data: { source: 'app',   target: 'dalgo'  } },
+      { data: { source: 'dalgo', target: 'sql'    } },
+      { data: { source: 'dalgo', target: 'fs'     } },
+      { data: { source: 'dalgo', target: 'kv'     } },
+      { data: { source: 'dalgo', target: 'cloud'  } },
+      { data: { source: 'dalgo', target: 'custom' } },
       { data: { source: 'sql',   target: 'sqlite' } },
       { data: { source: 'sql',   target: 'pg'     } },
       { data: { source: 'sql',   target: 'oracle' } },
@@ -651,6 +672,25 @@
           }
         },
 
+        // "Your own custom adapter" — dashed border, italic, sits at the bottom
+        {
+          selector: 'node[kind="custom"]',
+          style: {
+            'shape': 'round-rectangle',
+            'background-color': canvas,
+            'border-color': accent,
+            'border-style': 'dashed',
+            'border-width': 1,
+            'color': accent,
+            'font-family': monoFont,
+            'font-size': 11,
+            'font-style': 'italic',
+            'text-wrap': 'wrap',
+            'text-max-width': 140,
+            'padding': '10px'
+          }
+        },
+
         // Edges
         {
           selector: 'edge',
@@ -674,22 +714,33 @@
       layout: { name: 'preset', fit: true, padding: 18 }
     });
 
-    // Hover highlight: focus a node + its closed neighborhood + parent
-    // chain (compounds) + descendants. We include ancestors/descendants
-    // because compound nodes connect to their children by containment,
-    // not by edges.
+    // Hover highlight: light the full upstream path from the hovered node
+    // back through DALgo to "Your code". predecessors() walks incoming
+    // directed edges and returns every node/edge that can reach `n`,
+    // which is exactly the path-to-root for this DAG.
     cy.on('mouseover', 'node', function (e) {
       var n = e.target;
-      var nbh = n.closedNeighborhood()
-                 .union(n.ancestors())
-                 .union(n.descendants())
-                 .union(n.descendants().connectedEdges())
-                 .union(n.ancestors().connectedEdges());
-      cy.elements().difference(nbh).addClass('dim');
-      nbh.removeClass('dim').addClass('hi');
+      var path = n.predecessors().union(n).union(n.ancestors());
+      // If user hovers the outer Adapters compound directly, light its
+      // descendants too — otherwise the whole graph would dim.
+      if (n.isParent()) {
+        path = path.union(n.descendants());
+      }
+      cy.elements().difference(path).addClass('dim');
+      path.removeClass('dim').addClass('hi');
+
+      // Pointer cursor for nodes with an associated GitHub repo
+      if (n.data('url')) container.style.cursor = 'pointer';
     });
     cy.on('mouseout', 'node', function () {
       cy.elements().removeClass('dim hi');
+      container.style.cursor = '';
+    });
+
+    // Click an adapter -> open its GitHub repo in a new tab.
+    cy.on('tap', 'node', function (e) {
+      var url = e.target.data('url');
+      if (url) window.open(url, '_blank', 'noopener');
     });
 
     // Keep the graph fitted on resize.
