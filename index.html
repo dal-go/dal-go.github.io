@@ -1,441 +1,536 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-color-mode="auto" data-light-theme="light" data-dark-theme="dark">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>DALgo — Database Abstraction Layer for Go</title>
-<meta name="description" content="DALgo is an open-source Database Abstraction Layer for Go. One interface. Many databases. Swap your storage without rewriting your business logic." />
-<meta property="og:title" content="DALgo — Database Abstraction Layer for Go" />
+<title>dal-go — Database Abstraction Layer for Go</title>
+<meta name="description" content="DALgo is a Database Abstraction Layer for Go. One interface, many databases — SQL, Firestore, Datastore, BuntDB, Badger, files, Git." />
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)" />
+<meta property="og:title" content="dal-go — Database Abstraction Layer for Go" />
 <meta property="og:description" content="One interface. Many databases. Write storage-agnostic Go." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://dal-go.github.io" />
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%230a0e14'/><text x='50%25' y='52%25' text-anchor='middle' dominant-baseline='middle' font-family='ui-monospace,monospace' font-size='28' font-weight='700' fill='%2300ADD8'>d/</text></svg>" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..900,0..100,0..1&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%230d1117'/><text x='50%25' y='52%25' text-anchor='middle' dominant-baseline='middle' font-family='ui-monospace,monospace' font-size='28' font-weight='700' fill='%232f81f7'>d/</text></svg>" />
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
-<div class="grain" aria-hidden="true"></div>
-
-<header class="topbar">
-  <a class="brand" href="#top" aria-label="DALgo home">
-    <span class="brand-mark">d/</span>
-    <span class="brand-text">dal&middot;go</span>
-  </a>
-  <nav class="topnav" aria-label="Primary">
-    <a href="#why">Why</a>
-    <a href="#adapters">Adapters</a>
-    <a href="#quickstart">Quick start</a>
-    <a href="#interfaces">Interfaces</a>
-    <a class="ghlink" href="https://github.com/dal-go/dalgo" rel="noopener">
-      <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38v-1.33c-2.22.48-2.69-1.07-2.69-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.8.06 1.23.83 1.23.83.72 1.22 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.77-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.74-3.65 3.94.29.25.54.74.54 1.49v2.21c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
-      <span>GitHub</span>
+<header class="AppHeader" role="banner">
+  <div class="AppHeader-inner">
+    <a class="AppHeader-logo" href="#" aria-label="Home">
+      <svg viewBox="0 0 16 16" width="32" height="32" aria-hidden="true">
+        <path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38v-1.33c-2.22.48-2.69-1.07-2.69-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.8.06 1.23.83 1.23.83.72 1.22 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.77-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.74-3.65 3.94.29.25.54.74.54 1.49v2.21c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/>
+      </svg>
     </a>
-  </nav>
+
+    <nav class="AppHeader-context" aria-label="Context">
+      <a class="AppHeader-context-item AppHeader-context-org" href="https://github.com/dal-go" rel="noopener">
+        <span class="AppHeader-context-avatar" aria-hidden="true">d/</span>
+        <span>dal-go</span>
+      </a>
+    </nav>
+
+    <div class="AppHeader-search" role="search">
+      <label class="visually-hidden" for="topsearch">Search</label>
+      <input id="topsearch" type="search" placeholder="Type / to search" aria-label="Search" />
+      <kbd>/</kbd>
+    </div>
+
+    <nav class="AppHeader-nav" aria-label="Global">
+      <a href="https://pkg.go.dev/github.com/dal-go/dalgo" rel="noopener">Pkg.go.dev</a>
+      <a href="https://github.com/dal-go/dalgo/issues" rel="noopener">Issues</a>
+      <a href="https://github.com/dal-go" rel="noopener">Organization</a>
+    </nav>
+
+    <div class="AppHeader-actions">
+      <a class="btn btn-default btn-sm" href="https://github.com/dal-go/dalgo" rel="noopener">
+        <svg class="octicon" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg>
+        <span>Star</span>
+      </a>
+    </div>
+  </div>
 </header>
 
-<main id="top">
-
-<section class="hero">
-  <div class="hero-grid">
-
-    <div class="hero-eyebrow">
-      <span class="dot"></span>
-      <span>Open source &middot; Go module</span>
-    </div>
-
-    <h1 class="hero-title">
-      <span class="line line-1"><em>One</em> interface.</span>
-      <span class="line line-2">Many <span class="under">databases</span>.</span>
-      <span class="line line-3">Zero rewrites.</span>
-    </h1>
-
-    <p class="hero-lede">
-      <strong>DALgo</strong> is a Database Abstraction Layer for Go. Write your domain
-      logic once against a single, well-tested interface — swap Postgres for Firestore,
-      SQLite for Datastore, an in-memory store for a real one — without touching your
-      business code.
-    </p>
-
-    <div class="hero-cta">
-      <a class="btn btn-primary" href="#quickstart">
-        <span>Get started</span>
-        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M1 8h12.2l-3.6-3.6 1.1-1.1L16 8l-5.3 5.3-1.1-1.1L13.2 8H1z"/></svg>
-      </a>
-      <a class="btn btn-ghost" href="https://pkg.go.dev/github.com/dal-go/dalgo" rel="noopener">
-        pkg.go.dev
-      </a>
-      <code class="hero-install" tabindex="0">go&nbsp;get&nbsp;github.com/dal-go/dalgo</code>
-    </div>
-
-    <figure class="diagram" aria-label="Diagram: your Go code talks to DALgo, which talks to many databases">
-      <div class="diagram-frame">
-        <div class="diag-col diag-left">
-          <span class="diag-tag">Your code</span>
-          <div class="diag-node node-app">
-            <code>package main</code>
-            <code class="muted">// uses dal.Database</code>
-          </div>
-        </div>
-
-        <div class="diag-col diag-center">
-          <div class="diag-wires" aria-hidden="true">
-            <svg viewBox="0 0 220 320" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="wire" x1="0" x2="1">
-                  <stop offset="0" stop-color="#00ADD8" stop-opacity=".0"/>
-                  <stop offset=".5" stop-color="#00ADD8" stop-opacity=".9"/>
-                  <stop offset="1" stop-color="#00ADD8" stop-opacity=".0"/>
-                </linearGradient>
-              </defs>
-              <g fill="none" stroke="url(#wire)" stroke-width="1.2">
-                <path d="M0 160 L110 160"/>
-                <path d="M110 160 L220 30"/>
-                <path d="M110 160 L220 75"/>
-                <path d="M110 160 L220 120"/>
-                <path d="M110 160 L220 160"/>
-                <path d="M110 160 L220 200"/>
-                <path d="M110 160 L220 245"/>
-                <path d="M110 160 L220 290"/>
-              </g>
-              <circle cx="110" cy="160" r="5" fill="#00ADD8"/>
-            </svg>
-          </div>
-          <div class="diag-node node-core">
-            <span class="core-mark">d/</span>
-            <span class="core-name">dalgo</span>
-            <span class="core-sub">dal.Database</span>
-          </div>
-        </div>
-
-        <div class="diag-col diag-right" role="list">
-          <span class="diag-tag">Adapters</span>
-          <span class="diag-leaf" role="listitem">SQL</span>
-          <span class="diag-leaf" role="listitem">SQLite</span>
-          <span class="diag-leaf" role="listitem">Firestore</span>
-          <span class="diag-leaf" role="listitem">Datastore</span>
-          <span class="diag-leaf" role="listitem">BuntDB</span>
-          <span class="diag-leaf" role="listitem">Badger</span>
-          <span class="diag-leaf" role="listitem">Files / Git</span>
-          <span class="diag-leaf" role="listitem">inGitDB</span>
+<section class="OrgHero">
+  <div class="container">
+    <div class="OrgHero-grid">
+      <div class="OrgHero-avatar" aria-hidden="true">d/</div>
+      <div class="OrgHero-body">
+        <h1 class="OrgHero-name">dal-go</h1>
+        <p class="OrgHero-handle">@dal-go &middot; Database Abstraction Layer for Go</p>
+        <p class="OrgHero-bio">
+          One small, well-tested interface for Go that abstracts away the database underneath it.
+          Swap Postgres for Firestore, SQLite for Datastore, an in-memory store for a real one —
+          without rewriting your business code.
+        </p>
+        <ul class="OrgHero-meta" role="list">
+          <li>
+            <svg class="octicon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M3.75 1.5a.25.25 0 0 0-.25.25v11.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25V6H9.75A1.75 1.75 0 0 1 8 4.25V1.5H3.75ZM9.5 1.5v2.75c0 .138.112.25.25.25h2.5L9.5 1.5ZM2 1.75C2 .784 2.784 0 3.75 0h5.586c.464 0 .909.184 1.237.513l3.914 3.914c.329.328.513.773.513 1.237v8.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25V1.75Z"/></svg>
+            MIT-licensed
+          </li>
+          <li>
+            <svg class="octicon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg>
+            <a href="https://pkg.go.dev/github.com/dal-go/dalgo" rel="noopener">pkg.go.dev/github.com/dal-go/dalgo</a>
+          </li>
+          <li>
+            <svg class="octicon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75v-.878a2.25 2.25 0 1 1 1.5 0v.878a2.25 2.25 0 0 1-2.25 2.25h-1.5v2.128a2.251 2.251 0 1 1-1.5 0V8.5h-1.5A2.25 2.25 0 0 1 3.5 6.25v-.878a2.25 2.25 0 1 1 1.5 0ZM5 3.25a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Zm6.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm-3 8.75a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Z"/></svg>
+            15 public repositories
+          </li>
+        </ul>
+        <div class="OrgHero-actions">
+          <a class="btn btn-primary" href="#install">
+            <svg class="octicon" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14H2.75ZM7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"/></svg>
+            Get started
+          </a>
+          <a class="btn btn-default" href="https://github.com/dal-go" rel="noopener">View on GitHub</a>
         </div>
       </div>
-    </figure>
-
+    </div>
   </div>
 </section>
 
-<section id="why" class="why">
-  <header class="section-head">
-    <span class="section-num">01</span>
-    <h2 class="section-title">Why a DAL</h2>
-    <p class="section-kicker">Because storage is a detail — not a destiny.</p>
-  </header>
-
-  <div class="why-grid">
-    <article class="why-card">
-      <span class="why-rule"></span>
-      <h3>Storage-agnostic logic</h3>
-      <p>Write business code against <code>dal.Database</code>. Decide later whether it lives in Postgres, Firestore, or a JSON file on disk.</p>
-    </article>
-
-    <article class="why-card">
-      <span class="why-rule"></span>
-      <h3>Less code, more readable</h3>
-      <p>One small, opinionated API replaces piles of driver-specific boilerplate. Records, keys, queries, transactions — uniform across every adapter.</p>
-    </article>
-
-    <article class="why-card">
-      <span class="why-rule"></span>
-      <h3>Testable by construction</h3>
-      <p>Swap a production driver for an in-memory one in tests. No mocks-of-mocks. <a href="https://github.com/dal-go/mocks4dalgo" rel="noopener">mocks4dalgo</a> ships generated mocks for the whole interface surface.</p>
-    </article>
-
-    <article class="why-card">
-      <span class="why-rule"></span>
-      <h3>Hooks &amp; logging, for free</h3>
-      <p>Because every operation goes through one interface, observability and audit logging are a wrapper — not a refactor.</p>
-    </article>
-
-    <article class="why-card">
-      <span class="why-rule"></span>
-      <h3>One end-to-end test suite</h3>
-      <p>Every official adapter is validated against the same <a href="https://github.com/dal-go/dalgo-end2end-tests" rel="noopener">end-to-end test suite</a>. Conformance is the contract.</p>
-    </article>
-
-    <article class="why-card">
-      <span class="why-rule"></span>
-      <h3>Transactions, the way Go means them</h3>
-      <p>Read-only and read-write transactions are first-class. Pass a closure, get atomicity — without leaking driver-specific transaction types into your domain.</p>
-    </article>
-  </div>
-</section>
-
-<section id="adapters" class="adapters">
-  <header class="section-head">
-    <span class="section-num">02</span>
-    <h2 class="section-title">Adapters</h2>
-    <p class="section-kicker">Same interface. Different stores. Pick what your infra dictates.</p>
-  </header>
-
-  <ul class="adapter-grid" role="list">
-
-    <li class="adapter core">
-      <a href="https://github.com/dal-go/dalgo" rel="noopener">
-        <span class="adapter-kind">Core</span>
-        <h3>dalgo</h3>
-        <p>The interface itself. <code>dal</code>, <code>orm</code>, <code>record</code>, <code>update</code>, transactions, errors.</p>
-        <span class="adapter-go">github.com/dal-go/dalgo</span>
-      </a>
-    </li>
-
-    <li class="adapter">
-      <a href="https://github.com/dal-go/dalgo2sql" rel="noopener">
-        <span class="adapter-kind">SQL</span>
-        <h3>dalgo2sql</h3>
-        <p>Adapter for the standard <code>database/sql</code> — Postgres, MySQL, MSSQL, anything compliant.</p>
-        <span class="adapter-go">github.com/dal-go/dalgo2sql</span>
-      </a>
-    </li>
-
-    <li class="adapter">
-      <a href="https://github.com/dal-go/dalgo2sqlite" rel="noopener">
-        <span class="adapter-kind">SQL</span>
-        <h3>dalgo2sqlite</h3>
-        <p>SQLite-specific driver: schema, DDL, concurrency-aware operations on top of <code>dalgo2sql</code>.</p>
-        <span class="adapter-go">github.com/dal-go/dalgo2sqlite</span>
-      </a>
-    </li>
-
-    <li class="adapter">
-      <a href="https://github.com/dal-go/dalgo2firestore" rel="noopener">
-        <span class="adapter-kind">NoSQL / Cloud</span>
-        <h3>dalgo2firestore</h3>
-        <p>For Google Cloud Firestore — a globally distributed NoSQL document database.</p>
-        <span class="adapter-go">github.com/dal-go/dalgo2firestore</span>
-      </a>
-    </li>
-
-    <li class="adapter">
-      <a href="https://github.com/dal-go/dalgo2datastore" rel="noopener">
-        <span class="adapter-kind">NoSQL / Cloud</span>
-        <h3>dalgo2datastore</h3>
-        <p>For Google Cloud Datastore — Firestore's predecessor, still widely deployed on App Engine.</p>
-        <span class="adapter-go">github.com/dal-go/dalgo2datastore</span>
-      </a>
-    </li>
-
-    <li class="adapter">
-      <a href="https://github.com/dal-go/dalgo2buntdb" rel="noopener">
-        <span class="adapter-kind">Embedded KV</span>
-        <h3>dalgo2buntdb</h3>
-        <p>For BuntDB — an embeddable in-memory key/value store with custom indexing and geospatial support.</p>
-        <span class="adapter-go">github.com/dal-go/dalgo2buntdb</span>
-      </a>
-    </li>
-
-    <li class="adapter">
-      <a href="https://github.com/dal-go/dalgo2badger" rel="noopener">
-        <span class="adapter-kind">Embedded KV</span>
-        <h3>dalgo2badger</h3>
-        <p>For BadgerDB — an embeddable, persistent, fast key-value database written in pure Go.</p>
-        <span class="adapter-go">github.com/dal-go/dalgo2badger</span>
-      </a>
-    </li>
-
-    <li class="adapter">
-      <a href="https://github.com/dal-go/dalgo2files" rel="noopener">
-        <span class="adapter-kind">Filesystem</span>
-        <h3>dalgo2files</h3>
-        <p>Persist data on the local filesystem in human-readable formats — JSON, YAML, CSV.</p>
-        <span class="adapter-go">github.com/dal-go/dalgo2files</span>
-      </a>
-    </li>
-
-    <li class="adapter">
-      <a href="https://github.com/dal-go/dalgo2git" rel="noopener">
-        <span class="adapter-kind">Versioned</span>
-        <h3>dalgo2git</h3>
-        <p>Versioned, auditable storage backed by a Git repository — every write is a commit.</p>
-        <span class="adapter-go">github.com/dal-go/dalgo2git</span>
-      </a>
-    </li>
-
-    <li class="adapter">
-      <a href="https://github.com/ingitdb/ingitdb-cli/tree/main/pkg/dalgo2ingitdb" rel="noopener">
-        <span class="adapter-kind">Versioned</span>
-        <h3>dalgo2ingitdb</h3>
-        <p>Adapter for <a href="https://github.com/ingitdb">inGitDB</a> — a Git-native database with branchable, mergeable data. Lives in the inGitDB CLI.</p>
-        <span class="adapter-go">github.com/ingitdb/ingitdb-cli<wbr/>/pkg/dalgo2ingitdb</span>
-      </a>
-    </li>
-
-  </ul>
-
-  <aside class="adapter-also">
-    <h3>Companion modules</h3>
-    <ul role="list">
-      <li><a href="https://github.com/dal-go/mocks4dalgo" rel="noopener"><strong>mocks4dalgo</strong></a> — generated mocks for every DALgo interface, ready for table-driven tests.</li>
-      <li><a href="https://github.com/dal-go/dalgo-end2end-tests" rel="noopener"><strong>dalgo-end2end-tests</strong></a> — the conformance suite every adapter runs against.</li>
-      <li><a href="https://github.com/dal-go/dalgo-demo" rel="noopener"><strong>dalgo-demo</strong></a> — see how little code you need to ship a working app.</li>
-      <li><a href="https://github.com/dal-go/dalgo4auth" rel="noopener"><strong>dalgo4auth</strong></a> — opinionated record structs for user-auth tables.</li>
-      <li><a href="https://github.com/dal-go/dalgo-memcache-appengine" rel="noopener"><strong>dalgo-memcache-appengine</strong></a> — App Engine memcache wrapper for DALgo transactions.</li>
+<div class="UnderlineNav" role="navigation" aria-label="Repository">
+  <div class="container">
+    <ul class="UnderlineNav-list">
+      <li><a class="UnderlineNav-item is-selected" href="#repositories">
+        <svg class="octicon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.692 1.72.75.75 0 1 1-1.066 1.056A2.5 2.5 0 0 1 2 11.5v-9Zm10.5-1H4.5a1 1 0 0 0-1 1v6.708A2.493 2.493 0 0 1 4.5 9h8v-7.5Z"/></svg>
+        Repositories <span class="counter">15</span>
+      </a></li>
+      <li><a class="UnderlineNav-item" href="#quickstart">
+        <svg class="octicon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M4.72 3.22a.75.75 0 0 1 1.06 1.06L2.06 8l3.72 3.72a.749.749 0 1 1-1.06 1.06L.47 8.53a.75.75 0 0 1 0-1.06l4.25-4.25Zm6.56 0a.75.75 0 1 0-1.06 1.06L13.94 8l-3.72 3.72a.749.749 0 1 0 1.06 1.06l4.25-4.25a.75.75 0 0 0 0-1.06l-4.25-4.25Z"/></svg>
+        Quick start
+      </a></li>
+      <li><a class="UnderlineNav-item" href="#interfaces">
+        <svg class="octicon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M0 3.75A2.75 2.75 0 0 1 2.75 1h10.5A2.75 2.75 0 0 1 16 3.75v8.5A2.75 2.75 0 0 1 13.25 15H2.75A2.75 2.75 0 0 1 0 12.25v-8.5Z"/></svg>
+        Interfaces
+      </a></li>
+      <li><a class="UnderlineNav-item" href="https://github.com/dal-go/dalgo/blob/main/README.md" rel="noopener">
+        <svg class="octicon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M0 1.75A.75.75 0 0 1 .75 1h4.253c1.227 0 2.317.59 3 1.501A3.743 3.743 0 0 1 11.006 1h4.245a.75.75 0 0 1 .75.75v10.5a.75.75 0 0 1-.75.75h-4.507a2.25 2.25 0 0 0-1.591.659l-.622.621a.75.75 0 0 1-1.06 0l-.622-.621A2.25 2.25 0 0 0 5.258 13H.75a.75.75 0 0 1-.75-.75V1.75Z"/></svg>
+        Documentation
+      </a></li>
     </ul>
-  </aside>
-</section>
+  </div>
+</div>
 
-<section id="quickstart" class="quickstart">
-  <header class="section-head">
-    <span class="section-num">03</span>
-    <h2 class="section-title">Quick start</h2>
-    <p class="section-kicker">Install the core. Pick an adapter. Write a record. Done.</p>
-  </header>
+<main class="container layout">
 
-  <div class="qs-grid">
-    <ol class="qs-steps">
-      <li><span>1</span><p>Install the core module and one adapter — say, SQLite for local development.</p></li>
-      <li><span>2</span><p>Open a database. The returned <code>dal.Database</code> is the only type your app needs to know about.</p></li>
-      <li><span>3</span><p>Define a record, set its data, persist it inside a read-write transaction.</p></li>
-      <li><span>4</span><p>Later, swap <code>dalgo2sqlite</code> for <code>dalgo2firestore</code>. Your handlers don't change.</p></li>
-    </ol>
+  <div class="layout-main">
 
-    <div class="codeblock" role="figure" aria-label="Example: install and use">
-      <div class="code-tabs" role="tablist">
-        <span class="code-tab is-active">main.go</span>
-      </div>
-<pre><code><span class="c-c">// $ go get github.com/dal-go/dalgo</span>
-<span class="c-c">// $ go get github.com/dal-go/dalgo2sqlite</span>
+    <div class="readme">
+      <div class="Box">
+        <div class="Box-header">
+          <h2 class="Box-title">
+            <svg class="octicon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M0 1.75A.75.75 0 0 1 .75 1h4.253c1.227 0 2.317.59 3 1.501A3.743 3.743 0 0 1 11.006 1h4.245a.75.75 0 0 1 .75.75v10.5a.75.75 0 0 1-.75.75h-4.507a2.25 2.25 0 0 0-1.591.659l-.622.621a.75.75 0 0 1-1.06 0l-.622-.621A2.25 2.25 0 0 0 5.258 13H.75a.75.75 0 0 1-.75-.75V1.75Z"/></svg>
+            README.md
+          </h2>
+        </div>
+        <div class="Box-body markdown">
 
-<span class="c-k">package</span> main
+          <h1>DALgo <span class="badges">
+            <a href="https://github.com/dal-go/dalgo/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/badge/CI-passing-1f883d?style=flat-square&labelColor=24292f" /></a>
+            <a href="https://coveralls.io/github/dal-go/dalgo?branch=main"><img alt="coverage" src="https://img.shields.io/badge/coverage-100%25-1f883d?style=flat-square&labelColor=24292f" /></a>
+            <a href="https://goreportcard.com/report/github.com/dal-go/dalgo"><img alt="go report" src="https://img.shields.io/badge/go%20report-A%2B-0969da?style=flat-square&labelColor=24292f" /></a>
+            <a href="https://pkg.go.dev/github.com/dal-go/dalgo"><img alt="godoc" src="https://img.shields.io/badge/godoc-reference-0969da?style=flat-square&labelColor=24292f" /></a>
+          </span></h1>
 
-<span class="c-k">import</span> (
-    <span class="c-s">"context"</span>
-    <span class="c-s">"log"</span>
+          <p>
+            <strong>DALgo</strong> is a Database Abstraction Layer for Go. Write your domain
+            logic once against a single, well-tested interface — swap Postgres for Firestore,
+            SQLite for Datastore, an in-memory store for a real one — without touching your
+            business code.
+          </p>
 
-    <span class="c-s">"github.com/dal-go/dalgo/dal"</span>
-    <span class="c-s">"github.com/dal-go/dalgo2sqlite"</span>
+          <h2 id="install">Installation</h2>
+<pre><code class="lang-shell">go get github.com/dal-go/dalgo</code></pre>
+
+          <h2>What you get</h2>
+          <ul>
+            <li><strong>Storage-agnostic logic.</strong> Write business code against <code>dal.Database</code>. Decide later where it lives.</li>
+            <li><strong>Less code, more readable.</strong> One opinionated API replaces driver-specific boilerplate.</li>
+            <li><strong>Testable by construction.</strong> Swap a real driver for an in-memory one in tests — no mocks-of-mocks.</li>
+            <li><strong>Hooks &amp; logging, for free.</strong> Observability is a wrapper, not a refactor.</li>
+            <li><strong>One conformance suite.</strong> Every official adapter runs the same <a href="https://github.com/dal-go/dalgo-end2end-tests">end-to-end tests</a>.</li>
+            <li><strong>Transactions, the Go way.</strong> Pass a closure, get atomicity — no driver-specific transaction types in your domain.</li>
+          </ul>
+
+          <h2 id="quickstart">Quick start</h2>
+          <p>Install the core and one adapter — say, SQLite — then write your first record.</p>
+
+          <div class="highlight highlight-source-go">
+<pre><code><span class="pl-c">// $ go get github.com/dal-go/dalgo</span>
+<span class="pl-c">// $ go get github.com/dal-go/dalgo2sqlite</span>
+
+<span class="pl-k">package</span> main
+
+<span class="pl-k">import</span> (
+    <span class="pl-s">"context"</span>
+    <span class="pl-s">"log"</span>
+
+    <span class="pl-s">"github.com/dal-go/dalgo/dal"</span>
+    <span class="pl-s">"github.com/dal-go/dalgo2sqlite"</span>
 )
 
-<span class="c-k">type</span> User <span class="c-k">struct</span> {
-    Name  <span class="c-t">string</span> <span class="c-s">`json:"name"`</span>
-    Email <span class="c-t">string</span> <span class="c-s">`json:"email"`</span>
+<span class="pl-k">type</span> User <span class="pl-k">struct</span> {
+    Name  <span class="pl-t">string</span> <span class="pl-s">`json:"name"`</span>
+    Email <span class="pl-t">string</span> <span class="pl-s">`json:"email"`</span>
 }
 
-<span class="c-k">func</span> main() {
-    ctx := context.Background()
+<span class="pl-k">func</span> <span class="pl-en">main</span>() {
+    ctx <span class="pl-k">:=</span> context.<span class="pl-en">Background</span>()
 
-    db, err := <span class="c-fn">sqlite.Open</span>(ctx, <span class="c-s">"app.db"</span>)
-    <span class="c-k">if</span> err != <span class="c-k">nil</span> {
-        log.Fatal(err)
+    db, err <span class="pl-k">:=</span> sqlite.<span class="pl-en">Open</span>(ctx, <span class="pl-s">"app.db"</span>)
+    <span class="pl-k">if</span> err <span class="pl-k">!=</span> <span class="pl-c1">nil</span> {
+        log.<span class="pl-en">Fatal</span>(err)
     }
 
-    user := &amp;User{Name: <span class="c-s">"Ada"</span>, Email: <span class="c-s">"ada@example.com"</span>}
-    key   := dal.<span class="c-fn">NewKeyWithID</span>(<span class="c-s">"users"</span>, <span class="c-s">"u_001"</span>)
-    rec   := dal.<span class="c-fn">NewRecordWithData</span>(key, user)
+    user <span class="pl-k">:=</span> <span class="pl-k">&amp;</span>User{Name: <span class="pl-s">"Ada"</span>, Email: <span class="pl-s">"ada@example.com"</span>}
+    key  <span class="pl-k">:=</span> dal.<span class="pl-en">NewKeyWithID</span>(<span class="pl-s">"users"</span>, <span class="pl-s">"u_001"</span>)
+    rec  <span class="pl-k">:=</span> dal.<span class="pl-en">NewRecordWithData</span>(key, user)
 
-    err = db.<span class="c-fn">RunReadwriteTransaction</span>(ctx,
-        <span class="c-k">func</span>(ctx context.Context, tx dal.ReadwriteTransaction) <span class="c-t">error</span> {
-            <span class="c-k">return</span> tx.<span class="c-fn">Insert</span>(ctx, rec)
+    err <span class="pl-k">=</span> db.<span class="pl-en">RunReadwriteTransaction</span>(ctx,
+        <span class="pl-k">func</span>(ctx context.<span class="pl-en">Context</span>, tx dal.<span class="pl-en">ReadwriteTransaction</span>) <span class="pl-t">error</span> {
+            <span class="pl-k">return</span> tx.<span class="pl-en">Insert</span>(ctx, rec)
         },
     )
-    <span class="c-k">if</span> err != <span class="c-k">nil</span> {
-        log.Fatal(err)
+    <span class="pl-k">if</span> err <span class="pl-k">!=</span> <span class="pl-c1">nil</span> {
+        log.<span class="pl-en">Fatal</span>(err)
     }
 }
 </code></pre>
-    </div>
-  </div>
-</section>
+          </div>
 
-<section id="interfaces" class="interfaces">
-  <header class="section-head">
-    <span class="section-num">04</span>
-    <h2 class="section-title">The interface, in full</h2>
-    <p class="section-kicker">Small enough to memorize. Strict enough to keep adapters honest.</p>
-  </header>
+          <p>Later, swap <code>dalgo2sqlite</code> for <code>dalgo2firestore</code>. Your handlers don't change.</p>
 
-  <div class="iface-grid">
-    <div class="iface-prose">
-      <p>
-        Every DALgo adapter — SQL, NoSQL, embedded, filesystem — implements the same
-        <code>dal.Database</code> contract. Read operations live on
-        <code>ReadonlySession</code>; mutating operations live on
-        <code>ReadwriteSession</code>. Transactions are closures: pass a function, the
-        driver gives you a session, your code never sees a driver-specific handle.
-      </p>
-      <p class="iface-foot">
-        Drivers that genuinely can't implement an operation return
-        <code>dalgo.ErrNotSupported</code> — explicit failure beats silent nonsense.
-      </p>
-    </div>
+          <h2 id="interfaces">The interface, in full</h2>
+          <p>
+            Every DALgo adapter — SQL, NoSQL, embedded, filesystem — implements the same
+            <code>dal.Database</code> contract. Read operations live on
+            <code>ReadonlySession</code>; mutating operations live on
+            <code>ReadwriteSession</code>. Transactions are closures: pass a function, the
+            driver gives you a session, your code never sees a driver-specific handle.
+          </p>
 
-    <div class="codeblock codeblock-tight">
-<pre><code><span class="c-k">package</span> dal
+          <div class="highlight highlight-source-go">
+<pre><code><span class="pl-k">package</span> dal
 
-<span class="c-k">type</span> Database <span class="c-k">interface</span> {
+<span class="pl-k">type</span> Database <span class="pl-k">interface</span> {
     TransactionCoordinator
     ReadonlySession
 }
 
-<span class="c-k">type</span> TransactionCoordinator <span class="c-k">interface</span> {
-    <span class="c-fn">RunReadonlyTransaction</span>(ctx context.Context,
-        f ROTxWorker, opts ...TransactionOption) <span class="c-t">error</span>
+<span class="pl-k">type</span> TransactionCoordinator <span class="pl-k">interface</span> {
+    <span class="pl-en">RunReadonlyTransaction</span>(ctx context.<span class="pl-en">Context</span>,
+        f <span class="pl-en">ROTxWorker</span>, opts <span class="pl-k">...</span><span class="pl-en">TransactionOption</span>) <span class="pl-t">error</span>
 
-    <span class="c-fn">RunReadwriteTransaction</span>(ctx context.Context,
-        f RWTxWorker, opts ...TransactionOption) <span class="c-t">error</span>
+    <span class="pl-en">RunReadwriteTransaction</span>(ctx context.<span class="pl-en">Context</span>,
+        f <span class="pl-en">RWTxWorker</span>, opts <span class="pl-k">...</span><span class="pl-en">TransactionOption</span>) <span class="pl-t">error</span>
 }
 
-<span class="c-k">type</span> ReadonlySession <span class="c-k">interface</span> {
-    <span class="c-fn">Get</span>(ctx context.Context, record Record) <span class="c-t">error</span>
-    <span class="c-fn">GetMulti</span>(ctx context.Context, records []Record) <span class="c-t">error</span>
-    <span class="c-fn">Select</span>(ctx context.Context, query Select) (Reader, <span class="c-t">error</span>)
+<span class="pl-k">type</span> ReadonlySession <span class="pl-k">interface</span> {
+    <span class="pl-en">Get</span>(ctx context.<span class="pl-en">Context</span>, record <span class="pl-en">Record</span>) <span class="pl-t">error</span>
+    <span class="pl-en">GetMulti</span>(ctx context.<span class="pl-en">Context</span>, records []<span class="pl-en">Record</span>) <span class="pl-t">error</span>
+    <span class="pl-en">Select</span>(ctx context.<span class="pl-en">Context</span>, query <span class="pl-en">Select</span>) (<span class="pl-en">Reader</span>, <span class="pl-t">error</span>)
 }
 
-<span class="c-k">type</span> ReadwriteSession <span class="c-k">interface</span> {
+<span class="pl-k">type</span> ReadwriteSession <span class="pl-k">interface</span> {
     ReadonlySession
-    <span class="c-fn">Insert</span>(ctx context.Context, r Record, opts ...InsertOption) <span class="c-t">error</span>
-    <span class="c-fn">Set</span>(ctx context.Context, r Record) <span class="c-t">error</span>
-    <span class="c-fn">Update</span>(ctx context.Context, key *Key,
-        updates []Update, pre ...Precondition) <span class="c-t">error</span>
-    <span class="c-fn">Delete</span>(ctx context.Context, key *Key) <span class="c-t">error</span>
+    <span class="pl-en">Insert</span>(ctx context.<span class="pl-en">Context</span>, r <span class="pl-en">Record</span>, opts <span class="pl-k">...</span><span class="pl-en">InsertOption</span>) <span class="pl-t">error</span>
+    <span class="pl-en">Set</span>(ctx context.<span class="pl-en">Context</span>, r <span class="pl-en">Record</span>) <span class="pl-t">error</span>
+    <span class="pl-en">Update</span>(ctx context.<span class="pl-en">Context</span>, key <span class="pl-k">*</span><span class="pl-en">Key</span>,
+        updates []<span class="pl-en">Update</span>, pre <span class="pl-k">...</span><span class="pl-en">Precondition</span>) <span class="pl-t">error</span>
+    <span class="pl-en">Delete</span>(ctx context.<span class="pl-en">Context</span>, key <span class="pl-k">*</span><span class="pl-en">Key</span>) <span class="pl-t">error</span>
 }
 </code></pre>
-    </div>
-  </div>
-</section>
+          </div>
 
-<section class="closing">
-  <div class="closing-inner">
-    <h2>Storage is a detail.<br/><span>Treat it like one.</span></h2>
-    <p>DALgo is MIT-licensed, production-tested, and waiting for you to break it. Contributions for new adapters and edge cases are welcome.</p>
-    <div class="closing-cta">
-      <a class="btn btn-primary" href="https://github.com/dal-go/dalgo" rel="noopener">Star on GitHub</a>
-      <a class="btn btn-ghost" href="https://github.com/dal-go/dalgo/blob/main/CONTRIBUTING.md" rel="noopener">Contribute</a>
+          <blockquote>
+            Drivers that can't implement an operation return
+            <code>dalgo.ErrNotSupported</code> — explicit failure beats silent nonsense.
+          </blockquote>
+
+          <h2>License</h2>
+          <p>MIT &copy; DALgo contributors. See <a href="https://github.com/dal-go/dalgo/blob/main/LICENSE">LICENSE</a>.</p>
+
+        </div>
+      </div>
     </div>
+
+    <section id="repositories" class="repos">
+      <header class="repos-head">
+        <h2 class="repos-title">Repositories</h2>
+        <div class="repos-filter">
+          <input type="search" placeholder="Find a repository…" aria-label="Find a repository" />
+          <span class="filter-btn">Type <kbd>▾</kbd></span>
+          <span class="filter-btn">Language <kbd>▾</kbd></span>
+          <span class="filter-btn">Sort <kbd>▾</kbd></span>
+        </div>
+      </header>
+
+      <ul class="repo-list" role="list">
+
+        <li class="repo">
+          <div class="repo-main">
+            <h3><a href="https://github.com/dal-go/dalgo" rel="noopener">dalgo</a> <span class="Label">Public</span></h3>
+            <p>Database Abstraction Layer (DAL) in Go language.</p>
+            <div class="repo-meta">
+              <span class="lang"><span class="lang-dot" style="background:#00ADD8"></span>Go</span>
+              <span class="topic">core</span>
+              <span class="topic">dal</span>
+              <span class="topic">database</span>
+              <span class="updated">MIT &middot; Updated recently</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="repo">
+          <div class="repo-main">
+            <h3><a href="https://github.com/dal-go/dalgo2sql" rel="noopener">dalgo2sql</a> <span class="Label">Public</span></h3>
+            <p>SQL adapter for DALgo — wraps the standard <code>database/sql</code> for Postgres, MySQL, MSSQL, etc.</p>
+            <div class="repo-meta">
+              <span class="lang"><span class="lang-dot" style="background:#00ADD8"></span>Go</span>
+              <span class="topic">sql</span>
+              <span class="topic">database</span>
+              <span class="updated">MIT</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="repo">
+          <div class="repo-main">
+            <h3><a href="https://github.com/dal-go/dalgo2sqlite" rel="noopener">dalgo2sqlite</a> <span class="Label">Public</span></h3>
+            <p>SQLite-specific DALgo driver: <code>dbschema</code>, DDL, <code>ConcurrencyAware</code> on top of <code>dalgo2sql</code>.</p>
+            <div class="repo-meta">
+              <span class="lang"><span class="lang-dot" style="background:#00ADD8"></span>Go</span>
+              <span class="topic">sqlite</span>
+              <span class="topic">sql</span>
+              <span class="updated">MIT</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="repo">
+          <div class="repo-main">
+            <h3><a href="https://github.com/dal-go/dalgo2firestore" rel="noopener">dalgo2firestore</a> <span class="Label">Public</span></h3>
+            <p>Firebase Firestore implementation for DALgo — a globally distributed NoSQL document database.</p>
+            <div class="repo-meta">
+              <span class="lang"><span class="lang-dot" style="background:#00ADD8"></span>Go</span>
+              <span class="topic">firestore</span>
+              <span class="topic">nosql</span>
+              <span class="topic">gcp</span>
+              <span class="updated">MIT</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="repo">
+          <div class="repo-main">
+            <h3><a href="https://github.com/dal-go/dalgo2datastore" rel="noopener">dalgo2datastore</a> <span class="Label">Public</span></h3>
+            <p>Google Cloud Datastore (App Engine) implementation for the DALgo interface.</p>
+            <div class="repo-meta">
+              <span class="lang"><span class="lang-dot" style="background:#00ADD8"></span>Go</span>
+              <span class="topic">datastore</span>
+              <span class="topic">appengine</span>
+              <span class="topic">gcp</span>
+              <span class="updated">MIT</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="repo">
+          <div class="repo-main">
+            <h3><a href="https://github.com/dal-go/dalgo2buntdb" rel="noopener">dalgo2buntdb</a> <span class="Label">Public</span></h3>
+            <p>DALgo driver for BuntDB — an embeddable, in-memory key/value DB with custom indexing.</p>
+            <div class="repo-meta">
+              <span class="lang"><span class="lang-dot" style="background:#00ADD8"></span>Go</span>
+              <span class="topic">kv</span>
+              <span class="topic">embedded</span>
+              <span class="updated">MIT</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="repo">
+          <div class="repo-main">
+            <h3><a href="https://github.com/dal-go/dalgo2badger" rel="noopener">dalgo2badger</a> <span class="Label">Public</span></h3>
+            <p>DALgo bridge for BadgerDB — a persistent, fast key-value database in pure Go.</p>
+            <div class="repo-meta">
+              <span class="lang"><span class="lang-dot" style="background:#00ADD8"></span>Go</span>
+              <span class="topic">kv</span>
+              <span class="topic">embedded</span>
+              <span class="updated">MIT</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="repo">
+          <div class="repo-main">
+            <h3><a href="https://github.com/dal-go/dalgo2files" rel="noopener">dalgo2files</a> <span class="Label">Public</span></h3>
+            <p>DALgo provider that persists data on the local filesystem in JSON / YAML / CSV.</p>
+            <div class="repo-meta">
+              <span class="lang"><span class="lang-dot" style="background:#00ADD8"></span>Go</span>
+              <span class="topic">filesystem</span>
+              <span class="topic">json</span>
+              <span class="updated">MIT</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="repo">
+          <div class="repo-main">
+            <h3><a href="https://github.com/dal-go/dalgo2git" rel="noopener">dalgo2git</a> <span class="Label">Public</span></h3>
+            <p>DALgo driver for versioned storage backed by a Git repository — every write is a commit.</p>
+            <div class="repo-meta">
+              <span class="lang"><span class="lang-dot" style="background:#00ADD8"></span>Go</span>
+              <span class="topic">git</span>
+              <span class="topic">versioned</span>
+              <span class="updated">MIT</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="repo">
+          <div class="repo-main">
+            <h3><a href="https://github.com/ingitdb/ingitdb-cli/tree/main/pkg/dalgo2ingitdb" rel="noopener">dalgo2ingitdb</a> <span class="Label Label--secondary">External</span></h3>
+            <p>Adapter for <a href="https://github.com/ingitdb">inGitDB</a> — a Git-native database with branchable, mergeable data. Lives in <code>ingitdb-cli</code>.</p>
+            <div class="repo-meta">
+              <span class="lang"><span class="lang-dot" style="background:#00ADD8"></span>Go</span>
+              <span class="topic">git</span>
+              <span class="topic">versioned</span>
+              <span class="updated">External</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="repo">
+          <div class="repo-main">
+            <h3><a href="https://github.com/dal-go/mocks4dalgo" rel="noopener">mocks4dalgo</a> <span class="Label">Public</span></h3>
+            <p>Generated mocks for every DALgo interface — ready for table-driven tests.</p>
+            <div class="repo-meta">
+              <span class="lang"><span class="lang-dot" style="background:#00ADD8"></span>Go</span>
+              <span class="topic">testing</span>
+              <span class="topic">mocks</span>
+              <span class="updated">MIT</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="repo">
+          <div class="repo-main">
+            <h3><a href="https://github.com/dal-go/dalgo-end2end-tests" rel="noopener">dalgo-end2end-tests</a> <span class="Label">Public</span></h3>
+            <p>Conformance test suite every official DALgo adapter runs against.</p>
+            <div class="repo-meta">
+              <span class="lang"><span class="lang-dot" style="background:#00ADD8"></span>Go</span>
+              <span class="topic">testing</span>
+              <span class="topic">conformance</span>
+              <span class="updated">MIT</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="repo">
+          <div class="repo-main">
+            <h3><a href="https://github.com/dal-go/dalgo-demo" rel="noopener">dalgo-demo</a> <span class="Label">Public</span></h3>
+            <p>Small end-to-end demo showing how little code you need to ship with DALgo.</p>
+            <div class="repo-meta">
+              <span class="lang"><span class="lang-dot" style="background:#00ADD8"></span>Go</span>
+              <span class="topic">demo</span>
+              <span class="updated">MIT</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="repo">
+          <div class="repo-main">
+            <h3><a href="https://github.com/dal-go/dalgo4auth" rel="noopener">dalgo4auth</a> <span class="Label">Public</span></h3>
+            <p>Opinionated record structs for user-auth tables on top of DALgo.</p>
+            <div class="repo-meta">
+              <span class="lang"><span class="lang-dot" style="background:#00ADD8"></span>Go</span>
+              <span class="topic">auth</span>
+              <span class="updated">MIT</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="repo">
+          <div class="repo-main">
+            <h3><a href="https://github.com/dal-go/dalgo-memcache-appengine" rel="noopener">dalgo-memcache-appengine</a> <span class="Label">Public</span></h3>
+            <p>App Engine memcache wrapper for DALgo database / transaction operations.</p>
+            <div class="repo-meta">
+              <span class="lang"><span class="lang-dot" style="background:#00ADD8"></span>Go</span>
+              <span class="topic">cache</span>
+              <span class="topic">appengine</span>
+              <span class="updated">MIT</span>
+            </div>
+          </div>
+        </li>
+
+      </ul>
+    </section>
+
   </div>
-</section>
+
+  <aside class="layout-side" aria-label="About">
+
+    <div class="sidebar-section">
+      <h3 class="sidebar-title">About</h3>
+      <p class="sidebar-text">
+        DALgo is an open-source Database Abstraction Layer for Go. One small interface,
+        many database backends.
+      </p>
+      <p class="sidebar-link">
+        <svg class="octicon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg>
+        <a href="https://pkg.go.dev/github.com/dal-go/dalgo" rel="noopener">pkg.go.dev/github.com/dal-go/dalgo</a>
+      </p>
+      <div class="topics">
+        <span class="topic">go</span>
+        <span class="topic">golang</span>
+        <span class="topic">dal</span>
+        <span class="topic">database</span>
+        <span class="topic">sql</span>
+        <span class="topic">nosql</span>
+        <span class="topic">api-wrapper</span>
+      </div>
+      <ul class="sidebar-meta" role="list">
+        <li>
+          <svg class="octicon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M3.75 1.5a.25.25 0 0 0-.25.25v11.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25V6H9.75A1.75 1.75 0 0 1 8 4.25V1.5H3.75ZM2 1.75C2 .784 2.784 0 3.75 0h5.586c.464 0 .909.184 1.237.513l3.914 3.914c.329.328.513.773.513 1.237v8.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25V1.75Z"/></svg>
+          <a href="https://github.com/dal-go/dalgo/blob/main/README.md" rel="noopener">Readme</a>
+        </li>
+        <li>
+          <svg class="octicon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8.75.75V2h.985c.304 0 .603.08.867.231l1.29.736c.038.022.08.033.124.033h2.234a.75.75 0 0 1 0 1.5h-.427l2.111 4.692a.75.75 0 0 1-.154.838l-.53-.53.529.531-.001.002-.002.002-.006.006-.006.005-.01.01-.045.04c-.21.176-.441.327-.686.45C14.556 10.78 13.88 11 13 11a4.498 4.498 0 0 1-2.023-.454 3.544 3.544 0 0 1-.686-.45l-.045-.04-.016-.015-.006-.006-.004-.004v-.001a.75.75 0 0 1-.154-.838L12.178 4.5h-.162c-.305 0-.604-.079-.868-.231l-1.29-.736a.245.245 0 0 0-.124-.033H8.75V13h2.5a.75.75 0 0 1 0 1.5h-6.5a.75.75 0 0 1 0-1.5h2.5V3.5h-.984a.245.245 0 0 0-.124.033l-1.289.737c-.265.15-.564.23-.869.23h-.162l2.112 4.692a.75.75 0 0 1-.154.838l-.53-.53.529.531-.001.002-.002.002-.006.006-.016.015-.045.04c-.21.176-.441.327-.686.45C4.556 10.78 3.88 11 3 11a4.498 4.498 0 0 1-2.023-.454 3.544 3.544 0 0 1-.686-.45l-.045-.04-.016-.015-.006-.006-.004-.004v-.001a.75.75 0 0 1-.154-.838L2.178 4.5H1.75a.75.75 0 0 1 0-1.5h2.234a.249.249 0 0 0 .125-.033l1.288-.737c.265-.15.564-.23.869-.23h.984V.75a.75.75 0 0 1 1.5 0Z"/></svg>
+          MIT license
+        </li>
+      </ul>
+    </div>
+
+    <div class="sidebar-section">
+      <h3 class="sidebar-title">Used by</h3>
+      <p class="sidebar-text muted">Production deployments on App Engine, Cloud Run, and self-hosted Postgres.</p>
+    </div>
+
+    <div class="sidebar-section">
+      <h3 class="sidebar-title">Contributors</h3>
+      <div class="contrib-row">
+        <span class="contrib-avatar" aria-hidden="true">A</span>
+        <span class="contrib-avatar" aria-hidden="true">+</span>
+      </div>
+      <a class="sidebar-link-text" href="https://github.com/dal-go/dalgo/graphs/contributors" rel="noopener">View all</a>
+    </div>
+
+  </aside>
 
 </main>
 
-<footer class="footer">
-  <div class="footer-row">
-    <div class="footer-brand">
-      <span class="brand-mark">d/</span>
-      <span>dal&middot;go</span>
-    </div>
-    <nav class="footer-nav" aria-label="Footer">
-      <a href="https://github.com/dal-go" rel="noopener">GitHub org</a>
-      <a href="https://pkg.go.dev/github.com/dal-go/dalgo" rel="noopener">pkg.go.dev</a>
-      <a href="https://goreportcard.com/report/github.com/dal-go/dalgo" rel="noopener">Go Report Card</a>
-      <a href="https://github.com/dal-go/dalgo/blob/main/LICENSE" rel="noopener">MIT License</a>
-    </nav>
-  </div>
-  <div class="footer-fine">
-    <span>&copy; <span id="year">2026</span> DALgo contributors.</span>
-    <span class="footer-rule"></span>
-    <span>Built with stubborn opinions about abstraction.</span>
+<footer class="AppFooter">
+  <div class="container AppFooter-inner">
+    <ul role="list">
+      <li>&copy; <span id="year">2026</span> dal-go</li>
+      <li><a href="https://github.com/dal-go" rel="noopener">Organization</a></li>
+      <li><a href="https://github.com/dal-go/dalgo" rel="noopener">Core repo</a></li>
+      <li><a href="https://pkg.go.dev/github.com/dal-go/dalgo" rel="noopener">Pkg.go.dev</a></li>
+      <li><a href="https://github.com/dal-go/dalgo/blob/main/LICENSE" rel="noopener">MIT License</a></li>
+    </ul>
+    <span class="AppFooter-tag">Inspired by GitHub's Primer design system. Not affiliated with GitHub.</span>
   </div>
 </footer>
 
