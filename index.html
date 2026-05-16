@@ -483,44 +483,53 @@
     var goCyan       = '#00ADD8';
 
     // Positions are in an abstract coordinate space; Cytoscape fits them
-    // to the container with `fit: true`. Compound parents (kind=group, cat)
-    // have no position — they auto-size around their children.
+    // to the container with `fit: true`. The only compound is `adapters`,
+    // which auto-sizes around its children. All other nodes are simple
+    // nodes connected by edges.
     var elements = [
       // app + core
       { data: { id: 'app',   label: 'Your code',     kind: 'app'  }, position: { x:   0, y: 250 } },
       { data: { id: 'dalgo', label: 'DALgo\ndal.DB', kind: 'core' }, position: { x: 200, y: 250 } },
 
-      // outer compound: groups all adapter categories
+      // outer compound: groups all adapter nodes (categories + leaves)
       { data: { id: 'adapters', label: 'Adapters', kind: 'group' } },
 
-      // SQL compound + child leaves
-      { data: { id: 'sql', label: 'SQL', kind: 'cat', parent: 'adapters' } },
-      { data: { id: 'sqlite', label: 'SQLite',        kind: 'leaf', parent: 'sql' }, position: { x: 580, y:  20 } },
-      { data: { id: 'pg',     label: 'PostgreSQL',    kind: 'leaf', parent: 'sql' }, position: { x: 580, y:  56 } },
-      { data: { id: 'oracle', label: 'Oracle',        kind: 'leaf', parent: 'sql' }, position: { x: 580, y:  92 } },
-      { data: { id: 'mssql',  label: 'MS SQL Server', kind: 'leaf', parent: 'sql' }, position: { x: 580, y: 128 } },
+      // Category parent nodes (left column inside the compound)
+      { data: { id: 'sql',   label: 'SQL',                kind: 'cat', parent: 'adapters' }, position: { x: 420, y:  74 } },
+      { data: { id: 'fs',    label: 'File System',        kind: 'cat', parent: 'adapters' }, position: { x: 420, y: 210 } },
+      { data: { id: 'kv',    label: 'Key Value Storages', kind: 'cat', parent: 'adapters' }, position: { x: 420, y: 308 } },
+      { data: { id: 'cloud', label: 'Cloud',              kind: 'cat', parent: 'adapters' }, position: { x: 420, y: 446 } },
 
-      // File System: single-row leaf inside the outer compound
-      { data: { id: 'fs', label: 'File System', kind: 'cat-leaf', parent: 'adapters' }, position: { x: 580, y: 210 } },
+      // SQL children (right of SQL)
+      { data: { id: 'sqlite', label: 'SQLite',        kind: 'leaf', parent: 'adapters' }, position: { x: 620, y:  20 } },
+      { data: { id: 'pg',     label: 'PostgreSQL',    kind: 'leaf', parent: 'adapters' }, position: { x: 620, y:  56 } },
+      { data: { id: 'oracle', label: 'Oracle',        kind: 'leaf', parent: 'adapters' }, position: { x: 620, y:  92 } },
+      { data: { id: 'mssql',  label: 'MS SQL Server', kind: 'leaf', parent: 'adapters' }, position: { x: 620, y: 128 } },
 
-      // Key Value Storages compound + children
-      { data: { id: 'kv', label: 'Key Value\nStorages', kind: 'cat', parent: 'adapters' } },
-      { data: { id: 'redis',    label: 'Redis',    kind: 'leaf', parent: 'kv' }, position: { x: 580, y: 290 } },
-      { data: { id: 'memcache', label: 'Memcache', kind: 'leaf', parent: 'kv' }, position: { x: 580, y: 326 } },
+      // Key Value Storages children
+      { data: { id: 'redis',    label: 'Redis',    kind: 'leaf', parent: 'adapters' }, position: { x: 620, y: 290 } },
+      { data: { id: 'memcache', label: 'Memcache', kind: 'leaf', parent: 'adapters' }, position: { x: 620, y: 326 } },
 
-      // Cloud compound + children
-      { data: { id: 'cloud', label: 'Cloud', kind: 'cat', parent: 'adapters' } },
-      { data: { id: 'firestore', label: 'Firebase Firestore',   kind: 'leaf', parent: 'cloud' }, position: { x: 580, y: 410 } },
-      { data: { id: 'bigquery',  label: 'Google BigQuery',      kind: 'leaf', parent: 'cloud' }, position: { x: 580, y: 446 } },
-      { data: { id: 'spanner',   label: 'Google Cloud Spanner', kind: 'leaf', parent: 'cloud' }, position: { x: 580, y: 482 } },
+      // Cloud children
+      { data: { id: 'firestore', label: 'Firebase Firestore',   kind: 'leaf', parent: 'adapters' }, position: { x: 620, y: 410 } },
+      { data: { id: 'bigquery',  label: 'Google BigQuery',      kind: 'leaf', parent: 'adapters' }, position: { x: 620, y: 446 } },
+      { data: { id: 'spanner',   label: 'Google Cloud Spanner', kind: 'leaf', parent: 'adapters' }, position: { x: 620, y: 482 } },
 
-      // Edges (dalgo -> each category; no edges from category -> children since
-      // the compound containment already shows the grouping).
+      // Edges
       { data: { source: 'app',   target: 'dalgo' } },
       { data: { source: 'dalgo', target: 'sql'   } },
       { data: { source: 'dalgo', target: 'fs'    } },
       { data: { source: 'dalgo', target: 'kv'    } },
-      { data: { source: 'dalgo', target: 'cloud' } }
+      { data: { source: 'dalgo', target: 'cloud' } },
+      { data: { source: 'sql',   target: 'sqlite' } },
+      { data: { source: 'sql',   target: 'pg'     } },
+      { data: { source: 'sql',   target: 'oracle' } },
+      { data: { source: 'sql',   target: 'mssql'  } },
+      { data: { source: 'kv',    target: 'redis'    } },
+      { data: { source: 'kv',    target: 'memcache' } },
+      { data: { source: 'cloud', target: 'firestore' } },
+      { data: { source: 'cloud', target: 'bigquery'  } },
+      { data: { source: 'cloud', target: 'spanner'   } }
     ];
 
     var monoFont = 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace';
@@ -591,7 +600,7 @@
           }
         },
 
-        // Outer compound that groups all adapters
+        // Outer compound that groups every adapter (categories + leaves)
         {
           selector: 'node[kind="group"]',
           style: {
@@ -609,46 +618,25 @@
             'text-halign': 'center',
             'text-valign': 'top',
             'text-margin-y': -10,
-            'padding-top': 14,
-            'padding-bottom': 14,
-            'padding-left': 110,
-            'padding-right': 14
+            'padding': 16
           }
         },
 
-        // Category compound (SQL / KV / Cloud) — label OUTSIDE-LEFT of the box
+        // Category node (SQL / File System / Key Value Storages / Cloud)
+        // — simple node with centered label, accent fill
         {
           selector: 'node[kind="cat"]',
           style: {
             'shape': 'round-rectangle',
             'background-color': accentSubtle,
-            'background-opacity': 1,
             'border-color': accent,
             'border-width': 1,
             'color': accent,
             'font-family': monoFont,
             'font-size': 11,
             'font-weight': 700,
-            'text-halign': 'left',
-            'text-valign': 'center',
-            'text-margin-x': -10,
             'text-wrap': 'wrap',
-            'text-max-width': 90,
-            'text-justification': 'right',
-            'line-height': 1.25,
-            'padding': 10
-          }
-        },
-
-        // File System: styled as a category but is a leaf (no children)
-        {
-          selector: 'node[kind="cat-leaf"]',
-          style: {
-            'background-color': accentSubtle,
-            'border-color': accent,
-            'color': accent,
-            'font-weight': 700,
-            'padding': '8px'
+            'text-max-width': 110
           }
         },
 
