@@ -480,9 +480,7 @@
     Name, Email <span class="pl-t">string</span>
 }
 
-<span class="pl-k">func</span> (User) <span class="pl-en">CollectionName</span>() <span class="pl-t">string</span> { <span class="pl-k">return</span> <span class="pl-s">"users"</span> }
-
-<span class="pl-k">var</span> Users <span class="pl-k">=</span> dal.<span class="pl-en">CollectionOf</span>[User]()
+<span class="pl-k">var</span> Users <span class="pl-k">=</span> dal.<span class="pl-en">CollectionAt</span>[User](<span class="pl-s">"users"</span>)
 
 <span class="pl-k">func</span> <span class="pl-en">GetUser</span>(ctx context.<span class="pl-en">Context</span>, db dal.<span class="pl-en">DB</span>, id <span class="pl-t">string</span>) (User, <span class="pl-t">error</span>) {
     <span class="pl-k">return</span> Users.<span class="pl-en">Get</span>(ctx, db, id)
