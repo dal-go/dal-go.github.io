@@ -725,6 +725,35 @@ code, pre, kbd { font-family: var(--f-mono); }
   .compare-grid { grid-template-columns: 1fr; }
 }
 
+/* Tabbed comparison (GetUser / BanUser …) */
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-top: 20px;
+  border-bottom: 1px solid var(--border-default);
+}
+.tab-btn {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin: 0 0 -1px;
+  padding: 8px 16px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: color 120ms, border-color 120ms;
+}
+.tab-btn:hover { color: var(--fg-default); }
+.tab-btn.is-active {
+  color: var(--accent-fg);
+  border-bottom-color: var(--accent-fg);
+}
+.tab-panel { display: none; }
+.tab-panel.is-active { display: block; }
+
 /* ============================================================
    INTERFACES
    ============================================================ */

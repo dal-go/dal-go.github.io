@@ -434,8 +434,15 @@
     </p>
 
     <h3 class="section-title" style="font-size:1.15rem;margin-top:8px">Standard <code>database/sql</code> vs DALgo</h3>
-    <p class="section-kicker">The same “read one user by id”. The DALgo version is backend-agnostic — identical code runs on Firestore, SQL, the filesystem, or the in-memory adapter.</p>
+    <p class="section-kicker">The same operations written against the standard library and against DALgo. The DALgo version is backend-agnostic — identical code runs on Firestore, SQL, the filesystem, or the in-memory adapter.</p>
 
+    <div class="tabs" role="tablist" aria-label="Comparison examples">
+      <button class="tab-btn is-active" id="tabbtn-getuser" type="button" role="tab" aria-selected="true" aria-controls="tab-getuser">GetUser</button>
+      <button class="tab-btn" id="tabbtn-banuser" type="button" role="tab" aria-selected="false" aria-controls="tab-banuser">BanUser</button>
+    </div>
+
+    <div class="tab-panel is-active" id="tab-getuser" role="tabpanel" aria-labelledby="tabbtn-getuser">
+    <p class="section-kicker" style="margin-top:0">Read one user by id — and return a typed value directly.</p>
     <div class="compare-grid">
       <div class="codeblock" role="figure" aria-label="Standard database/sql">
         <div class="codeblock-head">
@@ -447,10 +454,12 @@
         </div>
 <pre><code><span class="pl-c">// Standard library: hand-written SQL + Scan.</span>
 <span class="pl-k">type</span> User <span class="pl-k">struct</span> {
-    ID, Name, Email <span class="pl-t">string</span>
+    ID    <span class="pl-t">int</span>
+    Name  <span class="pl-t">string</span>
+    Email <span class="pl-t">string</span>
 }
 
-<span class="pl-k">func</span> <span class="pl-en">GetUser</span>(ctx context.<span class="pl-en">Context</span>, db <span class="pl-k">*</span>sql.<span class="pl-en">DB</span>, id <span class="pl-t">string</span>) (<span class="pl-k">*</span>User, <span class="pl-t">error</span>) {
+<span class="pl-k">func</span> <span class="pl-en">GetUser</span>(ctx context.<span class="pl-en">Context</span>, db <span class="pl-k">*</span>sql.<span class="pl-en">DB</span>, id <span class="pl-t">int</span>) (<span class="pl-k">*</span>User, <span class="pl-t">error</span>) {
     row <span class="pl-k">:=</span> db.<span class="pl-en">QueryRowContext</span>(ctx,
         <span class="pl-s">"SELECT id, name, email FROM users WHERE id = ?"</span>, id)
 
@@ -477,17 +486,107 @@
         </div>
 <pre><code><span class="pl-c">// DALgo: one typed call, any backend.</span>
 <span class="pl-k">type</span> User <span class="pl-k">struct</span> {
-    Name, Email <span class="pl-t">string</span>
+    ID       <span class="pl-t">int</span>
+    Name     <span class="pl-t">string</span>
+    Email    <span class="pl-t">string</span>
+    IsBanned <span class="pl-t">bool</span>
 }
 
 <span class="pl-k">var</span> Users <span class="pl-k">=</span> dal.<span class="pl-en">CollectionAt</span>[User](<span class="pl-s">"users"</span>)
 
-<span class="pl-k">func</span> <span class="pl-en">GetUser</span>(ctx context.<span class="pl-en">Context</span>, db dal.<span class="pl-en">DB</span>, id <span class="pl-t">string</span>) (User, <span class="pl-t">error</span>) {
+<span class="pl-k">func</span> <span class="pl-en">GetUser</span>(ctx context.<span class="pl-en">Context</span>, db dal.<span class="pl-en">DB</span>, id <span class="pl-t">int</span>) (User, <span class="pl-t">error</span>) {
     <span class="pl-k">return</span> Users.<span class="pl-en">Get</span>(ctx, db, id)
 }
 </code></pre>
       </div>
     </div>
+    </div><!-- /tab-panel: getuser -->
+
+    <div class="tab-panel" id="tab-banuser" role="tabpanel" aria-labelledby="tabbtn-banuser">
+    <p class="section-kicker" style="margin-top:0">In one transaction: load the user, and if not already banned, set the flag and write an audit <code>Ban</code> record.</p>
+    <div class="compare-grid">
+      <div class="codeblock" role="figure" aria-label="Standard database/sql">
+        <div class="codeblock-head">
+          <span class="codeblock-dot" style="background:#ff5f57"></span>
+          <span class="codeblock-dot" style="background:#febc2e"></span>
+          <span class="codeblock-dot" style="background:#28c840"></span>
+          <span class="codeblock-name">database/sql</span>
+          <span class="codeblock-lang">Go</span>
+        </div>
+<pre><code><span class="pl-c">// Standard library: manual BEGIN / COMMIT / ROLLBACK.</span>
+<span class="pl-k">type</span> Ban <span class="pl-k">struct</span> {
+    UserID       <span class="pl-t">int</span>
+    BanTimestamp time.<span class="pl-en">Time</span>
+}
+
+<span class="pl-k">func</span> <span class="pl-en">BanUser</span>(ctx context.<span class="pl-en">Context</span>, db <span class="pl-k">*</span>sql.<span class="pl-en">DB</span>, id <span class="pl-t">int</span>) <span class="pl-t">error</span> {
+    tx, err <span class="pl-k">:=</span> db.<span class="pl-en">BeginTx</span>(ctx, <span class="pl-c1">nil</span>)
+    <span class="pl-k">if</span> err <span class="pl-k">!=</span> <span class="pl-c1">nil</span> {
+        <span class="pl-k">return</span> err
+    }
+    <span class="pl-k">defer</span> tx.<span class="pl-en">Rollback</span>()
+
+    <span class="pl-k">var</span> isBanned <span class="pl-t">bool</span>
+    <span class="pl-k">if</span> err <span class="pl-k">=</span> tx.<span class="pl-en">QueryRowContext</span>(ctx,
+        <span class="pl-s">"SELECT is_banned FROM users WHERE id = ?"</span>, id).<span class="pl-en">Scan</span>(<span class="pl-k">&amp;</span>isBanned); err <span class="pl-k">!=</span> <span class="pl-c1">nil</span> {
+        <span class="pl-k">return</span> err
+    }
+    <span class="pl-k">if</span> isBanned {
+        <span class="pl-k">return</span> <span class="pl-c1">nil</span>
+    }
+
+    <span class="pl-k">if</span> _, err <span class="pl-k">=</span> tx.<span class="pl-en">ExecContext</span>(ctx,
+        <span class="pl-s">"UPDATE users SET is_banned = TRUE WHERE id = ?"</span>, id); err <span class="pl-k">!=</span> <span class="pl-c1">nil</span> {
+        <span class="pl-k">return</span> err
+    }
+    <span class="pl-k">if</span> _, err <span class="pl-k">=</span> tx.<span class="pl-en">ExecContext</span>(ctx,
+        <span class="pl-s">"INSERT INTO bans (user_id, ban_timestamp) VALUES (?, ?)"</span>,
+        id, time.<span class="pl-en">Now</span>()); err <span class="pl-k">!=</span> <span class="pl-c1">nil</span> {
+        <span class="pl-k">return</span> err
+    }
+    <span class="pl-k">return</span> tx.<span class="pl-en">Commit</span>()
+}
+</code></pre>
+      </div>
+
+      <div class="codeblock" role="figure" aria-label="DALgo typed collection">
+        <div class="codeblock-head">
+          <span class="codeblock-dot" style="background:#ff5f57"></span>
+          <span class="codeblock-dot" style="background:#febc2e"></span>
+          <span class="codeblock-dot" style="background:#28c840"></span>
+          <span class="codeblock-name">DALgo</span>
+          <span class="codeblock-lang">Go</span>
+        </div>
+<pre><code><span class="pl-c">// DALgo: one closure, the driver runs the transaction.</span>
+<span class="pl-k">type</span> Ban <span class="pl-k">struct</span> {
+    UserID       <span class="pl-t">int</span>
+    BanTimestamp time.<span class="pl-en">Time</span>
+}
+
+<span class="pl-k">var</span> Bans <span class="pl-k">=</span> dal.<span class="pl-en">CollectionAt</span>[Ban](<span class="pl-s">"bans"</span>)
+
+<span class="pl-k">func</span> <span class="pl-en">BanUser</span>(ctx context.<span class="pl-en">Context</span>, db dal.<span class="pl-en">DB</span>, id <span class="pl-t">int</span>) <span class="pl-t">error</span> {
+    <span class="pl-k">return</span> db.<span class="pl-en">RunReadwriteTransaction</span>(ctx,
+        <span class="pl-k">func</span>(ctx context.<span class="pl-en">Context</span>, tx dal.<span class="pl-en">ReadwriteTransaction</span>) <span class="pl-t">error</span> {
+            user, err <span class="pl-k">:=</span> Users.<span class="pl-en">Get</span>(ctx, tx, id)
+            <span class="pl-k">if</span> err <span class="pl-k">!=</span> <span class="pl-c1">nil</span> {
+                <span class="pl-k">return</span> err
+            }
+            <span class="pl-k">if</span> user.IsBanned {
+                <span class="pl-k">return</span> <span class="pl-c1">nil</span>
+            }
+            <span class="pl-k">if</span> err <span class="pl-k">=</span> Users.<span class="pl-en">Update</span>(ctx, tx, id,
+                []update.<span class="pl-en">Update</span>{update.<span class="pl-en">ByFieldName</span>(<span class="pl-s">"IsBanned"</span>, <span class="pl-c1">true</span>)}); err <span class="pl-k">!=</span> <span class="pl-c1">nil</span> {
+                <span class="pl-k">return</span> err
+            }
+            _, err <span class="pl-k">=</span> Bans.<span class="pl-en">Insert</span>(ctx, tx, Ban{UserID: id, BanTimestamp: time.<span class="pl-en">Now</span>()})
+            <span class="pl-k">return</span> err
+        })
+}
+</code></pre>
+      </div>
+    </div>
+    </div><!-- /tab-panel: banuser -->
   </div>
 </section>
 
@@ -649,6 +748,28 @@ records, err <span class="pl-k">:=</span> dal.<span class="pl-en">ExecuteQueryAn
 
 <script>
   document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+
+<script>
+  // Tabbed comparison examples: toggle .is-active on the clicked button and
+  // the panel it controls (aria-controls -> panel id).
+  document.querySelectorAll('.tabs').forEach(function (tabs) {
+    var btns = Array.prototype.slice.call(tabs.querySelectorAll('.tab-btn'));
+    var panels = tabs.parentNode.querySelectorAll('.tab-panel');
+    btns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var target = btn.getAttribute('aria-controls');
+        btns.forEach(function (b) {
+          var on = b === btn;
+          b.classList.toggle('is-active', on);
+          b.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+        panels.forEach(function (p) {
+          p.classList.toggle('is-active', p.id === target);
+        });
+      });
+    });
+  });
 </script>
 
 <script src="https://unpkg.com/cytoscape@3.30.2/dist/cytoscape.min.js" defer></script>
