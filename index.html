@@ -437,8 +437,8 @@
     <p class="section-kicker">The same operations written against the standard library and against DALgo. The DALgo version is backend-agnostic — identical code runs on Firestore, SQL, the filesystem, or the in-memory adapter.</p>
 
     <div class="tabs" role="tablist" aria-label="Comparison examples">
-      <button class="tab-btn is-active" id="tabbtn-getuser" type="button" role="tab" aria-selected="true" aria-controls="tab-getuser">GetUser</button>
-      <button class="tab-btn" id="tabbtn-banuser" type="button" role="tab" aria-selected="false" aria-controls="tab-banuser">BanUser</button>
+      <button class="tab-btn is-active" id="tabbtn-getuser" type="button" role="tab" aria-selected="true" aria-controls="tab-getuser">GetUser()</button>
+      <button class="tab-btn" id="tabbtn-banuser" type="button" role="tab" aria-selected="false" aria-controls="tab-banuser">BanUser()</button>
     </div>
 
     <div class="tab-panel is-active" id="tab-getuser" role="tabpanel" aria-labelledby="tabbtn-getuser">
@@ -486,10 +486,9 @@
         </div>
 <pre><code><span class="pl-c">// DALgo: one typed call, any backend.</span>
 <span class="pl-k">type</span> User <span class="pl-k">struct</span> {
-    ID       <span class="pl-t">int</span>
-    Name     <span class="pl-t">string</span>
-    Email    <span class="pl-t">string</span>
-    IsBanned <span class="pl-t">bool</span>
+    ID    <span class="pl-t">int</span>
+    Name  <span class="pl-t">string</span>
+    Email <span class="pl-t">string</span>
 }
 
 <span class="pl-k">var</span> Users <span class="pl-k">=</span> dal.<span class="pl-en">CollectionAt</span>[User](<span class="pl-s">"users"</span>)
@@ -514,6 +513,13 @@
           <span class="codeblock-lang">Go</span>
         </div>
 <pre><code><span class="pl-c">// Standard library: manual BEGIN / COMMIT / ROLLBACK.</span>
+<span class="pl-k">type</span> User <span class="pl-k">struct</span> {
+    ID       <span class="pl-t">int</span>
+    Name     <span class="pl-t">string</span>
+    Email    <span class="pl-t">string</span>
+    IsBanned <span class="pl-t">bool</span>
+}
+
 <span class="pl-k">type</span> Ban <span class="pl-k">struct</span> {
     UserID       <span class="pl-t">int</span>
     BanTimestamp time.<span class="pl-en">Time</span>
@@ -526,12 +532,14 @@
     }
     <span class="pl-k">defer</span> tx.<span class="pl-en">Rollback</span>()
 
-    <span class="pl-k">var</span> isBanned <span class="pl-t">bool</span>
-    <span class="pl-k">if</span> err <span class="pl-k">=</span> tx.<span class="pl-en">QueryRowContext</span>(ctx,
-        <span class="pl-s">"SELECT is_banned FROM users WHERE id = ?"</span>, id).<span class="pl-en">Scan</span>(<span class="pl-k">&amp;</span>isBanned); err <span class="pl-k">!=</span> <span class="pl-c1">nil</span> {
+    <span class="pl-k">var</span> u User
+    err <span class="pl-k">=</span> tx.<span class="pl-en">QueryRowContext</span>(ctx,
+        <span class="pl-s">"SELECT id, name, email, is_banned FROM users WHERE id = ?"</span>, id).
+        <span class="pl-en">Scan</span>(<span class="pl-k">&amp;</span>u.ID, <span class="pl-k">&amp;</span>u.Name, <span class="pl-k">&amp;</span>u.Email, <span class="pl-k">&amp;</span>u.IsBanned)
+    <span class="pl-k">if</span> err <span class="pl-k">!=</span> <span class="pl-c1">nil</span> {
         <span class="pl-k">return</span> err
     }
-    <span class="pl-k">if</span> isBanned {
+    <span class="pl-k">if</span> u.IsBanned {
         <span class="pl-k">return</span> <span class="pl-c1">nil</span>
     }
 
@@ -558,12 +566,22 @@
           <span class="codeblock-lang">Go</span>
         </div>
 <pre><code><span class="pl-c">// DALgo: one closure, the driver runs the transaction.</span>
+<span class="pl-k">type</span> User <span class="pl-k">struct</span> {
+    ID       <span class="pl-t">int</span>
+    Name     <span class="pl-t">string</span>
+    Email    <span class="pl-t">string</span>
+    IsBanned <span class="pl-t">bool</span>
+}
+
 <span class="pl-k">type</span> Ban <span class="pl-k">struct</span> {
     UserID       <span class="pl-t">int</span>
     BanTimestamp time.<span class="pl-en">Time</span>
 }
 
-<span class="pl-k">var</span> Bans <span class="pl-k">=</span> dal.<span class="pl-en">CollectionAt</span>[Ban](<span class="pl-s">"bans"</span>)
+<span class="pl-k">var</span> (
+    Users <span class="pl-k">=</span> dal.<span class="pl-en">CollectionAt</span>[User](<span class="pl-s">"users"</span>)
+    Bans  <span class="pl-k">=</span> dal.<span class="pl-en">CollectionAt</span>[Ban](<span class="pl-s">"bans"</span>)
+)
 
 <span class="pl-k">func</span> <span class="pl-en">BanUser</span>(ctx context.<span class="pl-en">Context</span>, db dal.<span class="pl-en">DB</span>, id <span class="pl-t">int</span>) <span class="pl-t">error</span> {
     <span class="pl-k">return</span> db.<span class="pl-en">RunReadwriteTransaction</span>(ctx,
