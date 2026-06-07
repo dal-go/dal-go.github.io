@@ -491,10 +491,8 @@
     Email <span class="pl-t">string</span>
 }
 
-<span class="pl-k">var</span> Users <span class="pl-k">=</span> dal.<span class="pl-en">CollectionAt</span>[User](<span class="pl-s">"users"</span>)
-
 <span class="pl-k">func</span> <span class="pl-en">GetUser</span>(ctx context.<span class="pl-en">Context</span>, db dal.<span class="pl-en">DB</span>, id <span class="pl-t">int</span>) (User, <span class="pl-t">error</span>) {
-    <span class="pl-k">return</span> Users.<span class="pl-en">Get</span>(ctx, db, id)
+    <span class="pl-k">return</span> dal.<span class="pl-en">CollectionAt</span>[User](<span class="pl-s">"users"</span>).<span class="pl-en">Get</span>(ctx, db, id)
 }
 </code></pre>
       </div>
@@ -578,26 +576,23 @@
     BanTimestamp time.<span class="pl-en">Time</span>
 }
 
-<span class="pl-k">var</span> (
-    Users <span class="pl-k">=</span> dal.<span class="pl-en">CollectionAt</span>[User](<span class="pl-s">"users"</span>)
-    Bans  <span class="pl-k">=</span> dal.<span class="pl-en">CollectionAt</span>[Ban](<span class="pl-s">"bans"</span>)
-)
-
 <span class="pl-k">func</span> <span class="pl-en">BanUser</span>(ctx context.<span class="pl-en">Context</span>, db dal.<span class="pl-en">DB</span>, id <span class="pl-t">int</span>) <span class="pl-t">error</span> {
     <span class="pl-k">return</span> db.<span class="pl-en">RunReadwriteTransaction</span>(ctx,
         <span class="pl-k">func</span>(ctx context.<span class="pl-en">Context</span>, tx dal.<span class="pl-en">ReadwriteTransaction</span>) <span class="pl-t">error</span> {
-            user, err <span class="pl-k">:=</span> Users.<span class="pl-en">Get</span>(ctx, tx, id)
+            users <span class="pl-k">:=</span> dal.<span class="pl-en">CollectionAt</span>[User](<span class="pl-s">"users"</span>)
+            user, err <span class="pl-k">:=</span> users.<span class="pl-en">Get</span>(ctx, tx, id)
             <span class="pl-k">if</span> err <span class="pl-k">!=</span> <span class="pl-c1">nil</span> {
                 <span class="pl-k">return</span> err
             }
             <span class="pl-k">if</span> user.IsBanned {
                 <span class="pl-k">return</span> <span class="pl-c1">nil</span>
             }
-            <span class="pl-k">if</span> err <span class="pl-k">=</span> Users.<span class="pl-en">Update</span>(ctx, tx, id,
+            <span class="pl-k">if</span> err <span class="pl-k">=</span> users.<span class="pl-en">Update</span>(ctx, tx, id,
                 []update.<span class="pl-en">Update</span>{update.<span class="pl-en">ByFieldName</span>(<span class="pl-s">"IsBanned"</span>, <span class="pl-c1">true</span>)}); err <span class="pl-k">!=</span> <span class="pl-c1">nil</span> {
                 <span class="pl-k">return</span> err
             }
-            _, err <span class="pl-k">=</span> Bans.<span class="pl-en">Insert</span>(ctx, tx, Ban{UserID: id, BanTimestamp: time.<span class="pl-en">Now</span>()})
+            bans <span class="pl-k">:=</span> dal.<span class="pl-en">CollectionAt</span>[Ban](<span class="pl-s">"bans"</span>)
+            _, err <span class="pl-k">=</span> bans.<span class="pl-en">Insert</span>(ctx, tx, Ban{UserID: id, BanTimestamp: time.<span class="pl-en">Now</span>()})
             <span class="pl-k">return</span> err
         })
 }
