@@ -713,6 +713,18 @@ code, pre, kbd { font-family: var(--f-mono); }
 .pl-en  { color: var(--pl-en); }
 .pl-c1  { color: var(--pl-c1); }
 
+/* Side-by-side comparison of two codeblocks (equal width, stacks on mobile) */
+.compare-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  margin-top: 28px;
+}
+@media (max-width: 880px) {
+  .compare-grid { grid-template-columns: 1fr; }
+}
+
 /* ============================================================
    INTERFACES
    ============================================================ */

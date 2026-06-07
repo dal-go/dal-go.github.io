@@ -36,6 +36,7 @@
       <a href="#why">Why</a>
       <a href="#adapters">Adapters</a>
       <a href="#quickstart">Quick start</a>
+      <a href="#collections">Collections</a>
       <a href="#interfaces">Interfaces</a>
       <a href="#queries">Queries</a>
       <a href="/dtql/">DTQL</a>
@@ -376,11 +377,132 @@
   </div>
 </section>
 
+<!-- ============================ TYPED COLLECTIONS ============================ -->
+<section id="collections" class="section">
+  <div class="container">
+    <header class="section-head">
+      <span class="section-eyebrow">04 — Typed collections</span>
+      <h2 class="section-title">Less ceremony for everyday CRUD.</h2>
+      <p class="section-kicker">A generic, session-less <code>dal.Collection[T]</code> handle returns typed values directly — no key wrangling, no record wrapping, no type assertions. It is additive over the core API and works with every adapter.</p>
+    </header>
+
+    <div class="codeblock" role="figure" aria-label="Example: typed collection">
+      <div class="codeblock-head">
+        <span class="codeblock-dot" style="background:#ff5f57"></span>
+        <span class="codeblock-dot" style="background:#febc2e"></span>
+        <span class="codeblock-dot" style="background:#28c840"></span>
+        <span class="codeblock-name">collections.go</span>
+        <span class="codeblock-lang">Go</span>
+      </div>
+<pre><code><span class="pl-k">type</span> User <span class="pl-k">struct</span> {
+    Name  <span class="pl-t">string</span> <span class="pl-s">`json:"name"`</span>
+    Email <span class="pl-t">string</span> <span class="pl-s">`json:"email"`</span>
+}
+
+<span class="pl-c">// CollectionName (value receiver) names the collection.</span>
+<span class="pl-k">func</span> (User) <span class="pl-en">CollectionName</span>() <span class="pl-t">string</span> { <span class="pl-k">return</span> <span class="pl-s">"users"</span> }
+
+<span class="pl-c">// A Collection[T] holds no session — declare it once and reuse it.</span>
+<span class="pl-k">var</span> Users <span class="pl-k">=</span> dal.<span class="pl-en">CollectionOf</span>[User]()
+
+<span class="pl-k">func</span> <span class="pl-en">demo</span>(ctx context.<span class="pl-en">Context</span>, db dal.<span class="pl-en">DB</span>) <span class="pl-t">error</span> {
+    <span class="pl-c">// Writes take a WriteSession — only reachable inside a transaction.</span>
+    <span class="pl-k">if</span> err <span class="pl-k">:=</span> db.<span class="pl-en">RunReadwriteTransaction</span>(ctx,
+        <span class="pl-k">func</span>(ctx context.<span class="pl-en">Context</span>, tx dal.<span class="pl-en">ReadwriteTransaction</span>) <span class="pl-t">error</span> {
+            <span class="pl-k">return</span> Users.<span class="pl-en">Set</span>(ctx, tx, <span class="pl-s">"u1"</span>,
+                User{Name: <span class="pl-s">"Ada Lovelace"</span>, Email: <span class="pl-s">"ada@example.com"</span>})
+        }); err <span class="pl-k">!=</span> <span class="pl-c1">nil</span> {
+        <span class="pl-k">return</span> err
+    }
+
+    <span class="pl-c">// Reads take a ReadSession (a plain dal.DB works) and return T.</span>
+    user, err <span class="pl-k">:=</span> Users.<span class="pl-en">Get</span>(ctx, db, <span class="pl-s">"u1"</span>)
+    <span class="pl-k">if</span> err <span class="pl-k">!=</span> <span class="pl-c1">nil</span> { <span class="pl-c">// not-found via dal.IsNotFound(err)</span>
+        <span class="pl-k">return</span> err
+    }
+    fmt.<span class="pl-en">Println</span>(user.Email)
+    <span class="pl-k">return</span> <span class="pl-c1">nil</span>
+}
+</code></pre>
+    </div>
+
+    <p class="section-kicker" style="margin-top:28px">
+      The same handle also offers <code>Insert</code> (generated id), <code>InsertWithID</code>,
+      <code>All</code>, <code>First</code>, <code>Count</code>, <code>Exists</code>,
+      <code>Update</code>, <code>Delete</code>, batch <code>InsertMany</code>, and
+      <code>In(parentKey)</code> for nested collections.
+    </p>
+
+    <h3 class="section-title" style="font-size:1.15rem;margin-top:8px">Standard <code>database/sql</code> vs DALgo</h3>
+    <p class="section-kicker">The same “read one user by id”. The DALgo version is backend-agnostic — identical code runs on Firestore, SQL, the filesystem, or the in-memory adapter.</p>
+
+    <div class="compare-grid">
+      <div class="codeblock" role="figure" aria-label="Standard database/sql">
+        <div class="codeblock-head">
+          <span class="codeblock-dot" style="background:#ff5f57"></span>
+          <span class="codeblock-dot" style="background:#febc2e"></span>
+          <span class="codeblock-dot" style="background:#28c840"></span>
+          <span class="codeblock-name">database/sql</span>
+          <span class="codeblock-lang">Go</span>
+        </div>
+<pre><code><span class="pl-c">// Standard library: hand-written SQL + Scan.</span>
+<span class="pl-k">type</span> User <span class="pl-k">struct</span> {
+    ID, Name, Email <span class="pl-t">string</span>
+}
+
+<span class="pl-k">func</span> <span class="pl-en">GetUser</span>(ctx context.<span class="pl-en">Context</span>, db <span class="pl-k">*</span>sql.<span class="pl-en">DB</span>,
+    id <span class="pl-t">string</span>) (<span class="pl-k">*</span>User, <span class="pl-t">error</span>) {
+
+    row <span class="pl-k">:=</span> db.<span class="pl-en">QueryRowContext</span>(ctx,
+        <span class="pl-s">"SELECT id, name, email "</span><span class="pl-k">+</span>
+            <span class="pl-s">"FROM users WHERE id = ?"</span>, id)
+
+    u <span class="pl-k">:=</span> <span class="pl-k">&amp;</span>User{}
+    err <span class="pl-k">:=</span> row.<span class="pl-en">Scan</span>(<span class="pl-k">&amp;</span>u.ID, <span class="pl-k">&amp;</span>u.Name, <span class="pl-k">&amp;</span>u.Email)
+    <span class="pl-k">if</span> errors.<span class="pl-en">Is</span>(err, sql.ErrNoRows) {
+        <span class="pl-k">return</span> <span class="pl-c1">nil</span>, <span class="pl-c1">nil</span>
+    }
+    <span class="pl-k">if</span> err <span class="pl-k">!=</span> <span class="pl-c1">nil</span> {
+        <span class="pl-k">return</span> <span class="pl-c1">nil</span>, err
+    }
+    <span class="pl-k">return</span> u, <span class="pl-c1">nil</span>
+}
+</code></pre>
+      </div>
+
+      <div class="codeblock" role="figure" aria-label="DALgo typed collection">
+        <div class="codeblock-head">
+          <span class="codeblock-dot" style="background:#ff5f57"></span>
+          <span class="codeblock-dot" style="background:#febc2e"></span>
+          <span class="codeblock-dot" style="background:#28c840"></span>
+          <span class="codeblock-name">DALgo</span>
+          <span class="codeblock-lang">Go</span>
+        </div>
+<pre><code><span class="pl-c">// DALgo: one typed call, any backend.</span>
+<span class="pl-k">type</span> User <span class="pl-k">struct</span> {
+    Name, Email <span class="pl-t">string</span>
+}
+
+<span class="pl-k">func</span> (User) <span class="pl-en">CollectionName</span>() <span class="pl-t">string</span> { <span class="pl-k">return</span> <span class="pl-s">"users"</span> }
+
+<span class="pl-k">var</span> Users <span class="pl-k">=</span> dal.<span class="pl-en">CollectionOf</span>[User]()
+
+<span class="pl-k">func</span> <span class="pl-en">GetUser</span>(ctx context.<span class="pl-en">Context</span>, db dal.<span class="pl-en">DB</span>,
+    id <span class="pl-t">string</span>) (User, <span class="pl-t">error</span>) {
+
+    <span class="pl-k">return</span> Users.<span class="pl-en">Get</span>(ctx, db, id)
+}
+</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ============================ INTERFACES ============================ -->
 <section id="interfaces" class="section section-subtle">
   <div class="container">
     <header class="section-head">
-      <span class="section-eyebrow">04 — The interface</span>
+      <span class="section-eyebrow">05 — The interface</span>
       <h2 class="section-title">Small enough to memorize.</h2>
       <p class="section-kicker">Strict enough to keep every adapter honest.</p>
     </header>
@@ -452,7 +574,7 @@
 <section id="queries" class="section">
   <div class="container">
     <header class="section-head">
-      <span class="section-eyebrow">05 — Queries &amp; schema</span>
+      <span class="section-eyebrow">06 — Queries &amp; schema</span>
       <h2 class="section-title">More than get and set.</h2>
       <p class="section-kicker">A structured query builder, hierarchical collections, and schema-aware key mapping — capability-based across adapters.</p>
     </header>
