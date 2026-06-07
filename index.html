@@ -452,8 +452,7 @@
 
 <span class="pl-k">func</span> <span class="pl-en">GetUser</span>(ctx context.<span class="pl-en">Context</span>, db <span class="pl-k">*</span>sql.<span class="pl-en">DB</span>, id <span class="pl-t">string</span>) (<span class="pl-k">*</span>User, <span class="pl-t">error</span>) {
     row <span class="pl-k">:=</span> db.<span class="pl-en">QueryRowContext</span>(ctx,
-        <span class="pl-s">"SELECT id, name, email "</span><span class="pl-k">+</span>
-            <span class="pl-s">"FROM users WHERE id = ?"</span>, id)
+        <span class="pl-s">"SELECT id, name, email FROM users WHERE id = ?"</span>, id)
 
     u <span class="pl-k">:=</span> <span class="pl-k">&amp;</span>User{}
     err <span class="pl-k">:=</span> row.<span class="pl-en">Scan</span>(<span class="pl-k">&amp;</span>u.ID, <span class="pl-k">&amp;</span>u.Name, <span class="pl-k">&amp;</span>u.Email)
