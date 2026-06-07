@@ -450,9 +450,7 @@
     ID, Name, Email <span class="pl-t">string</span>
 }
 
-<span class="pl-k">func</span> <span class="pl-en">GetUser</span>(ctx context.<span class="pl-en">Context</span>, db <span class="pl-k">*</span>sql.<span class="pl-en">DB</span>,
-    id <span class="pl-t">string</span>) (<span class="pl-k">*</span>User, <span class="pl-t">error</span>) {
-
+<span class="pl-k">func</span> <span class="pl-en">GetUser</span>(ctx context.<span class="pl-en">Context</span>, db <span class="pl-k">*</span>sql.<span class="pl-en">DB</span>, id <span class="pl-t">string</span>) (<span class="pl-k">*</span>User, <span class="pl-t">error</span>) {
     row <span class="pl-k">:=</span> db.<span class="pl-en">QueryRowContext</span>(ctx,
         <span class="pl-s">"SELECT id, name, email "</span><span class="pl-k">+</span>
             <span class="pl-s">"FROM users WHERE id = ?"</span>, id)
@@ -487,9 +485,7 @@
 
 <span class="pl-k">var</span> Users <span class="pl-k">=</span> dal.<span class="pl-en">CollectionOf</span>[User]()
 
-<span class="pl-k">func</span> <span class="pl-en">GetUser</span>(ctx context.<span class="pl-en">Context</span>, db dal.<span class="pl-en">DB</span>,
-    id <span class="pl-t">string</span>) (User, <span class="pl-t">error</span>) {
-
+<span class="pl-k">func</span> <span class="pl-en">GetUser</span>(ctx context.<span class="pl-en">Context</span>, db dal.<span class="pl-en">DB</span>, id <span class="pl-t">string</span>) (User, <span class="pl-t">error</span>) {
     <span class="pl-k">return</span> Users.<span class="pl-en">Get</span>(ctx, db, id)
 }
 </code></pre>
