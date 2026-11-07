@@ -1,33 +1,26 @@
 # dal-go.github.io
 
-Source for **https://dal-go.github.io** — the landing page for the
-[DALgo](https://github.com/dal-go/dalgo) ecosystem.
+Source for **https://dal-go.github.io**. Every HTML page is a minimal redirect to the matching URL on the official site, **https://dalgo.io/**.
 
-## DALgo in DataTug development
+There is no sitemap. `.nojekyll` stays so GitHub Pages serves these files as-is. This repository has no `CNAME`; Pages publishes the default `dal-go.github.io` host.
 
-In [DataTug](https://datatug.app), DALgo provides a data-access seam in the development ecosystem. Read [how DataTug’s development tools were built](https://datatug.app/en/under-the-hood/tools-we-built/).
+## Redirects
 
-## Stack
+| Path | Destination |
+| --- | --- |
+| `/` | https://dalgo.io/ |
+| `/tugql/` | https://dalgo.io/tugql/ |
+| `/tugql/examples/` | https://dalgo.io/tugql/examples/ |
+| `/dtql/` | https://dalgo.io/tugql/ |
+| unknown paths (`404.html`) | https://dalgo.io/ |
 
-Plain static HTML + CSS. No build step. GitHub Pages serves the contents of
-`main` directly (a `.nojekyll` file disables Jekyll processing).
+`/dtql/` is not listed in https://dalgo.io/sitemap.xml. The old page, and https://dalgo.io/dtql/, only point at TugQL, so the redirect goes to https://dalgo.io/tugql/.
 
-## Local preview
+Each page sets a canonical link, a zero-delay meta refresh, `noindex, follow`, `location.replace`, and a visible link.
 
-```sh
-# any static server works
-python3 -m http.server 8000
-# then open http://localhost:8000
-```
+## Schema documents
 
-## Editing
-
-- `index.html` — page content and structure.
-- `styles.css` — design system: fonts, colors, layout, motion.
-- `.nojekyll` — keep this file; it tells GitHub Pages to serve files as-is.
-
-When adding a new adapter to the DALgo org, also add a card to the **Adapters**
-section in `index.html`.
+`tugql/schema.json`, `tugql/schema.yaml`, `dtql/schema.json`, and the TugQL example YAML files stay. The schema `$id` is `https://dal-go.github.io/tugql/schema.json`, and https://dalgo.io/dtql/schema.json references that URL.
 
 ## License
 
